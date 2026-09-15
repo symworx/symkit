@@ -43,7 +43,7 @@ placeholder, ask.
 |:------------------|:-----|
 | `develop` | Day-to-day authoring |
 | `main` | Stable, student-facing materials |
-| Tagged releases | Materials drops (scheme is course-defined) |
+| Tagged drops | Optional; scheme is course-defined |
 
 Follow the course `CONTRIBUTING.md` when present.
 
@@ -61,7 +61,7 @@ Follow the course `CONTRIBUTING.md` when present.
 If present under `.agents/rules/` (and vendor adapters), also follow:
 
 - `ai-course-policy.md` — thin pointer to `docs/ai-what-to-expect.md`
-- `course-materials.md` — materials, what to commit, release norms
+- `course-materials.md` — materials and what to commit
 - `slos-as-truth.md` — published course outcomes; do not invent SLOs
 - `data-handling.md` — data layout and restricted-data boundaries
 

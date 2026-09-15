@@ -9,7 +9,9 @@ CLI-first. No web app.
 1. Where — target directory
 2. Which harness — `symkit list` (teaching, research, engineering, …)
 3. Which role — `symkit show <harness>`
-4. Scaffold? — workspace files if the tree is new (`init --scaffold`)
+4. Scaffold? — skip when the target already has a course layout
+   ([csymd/symcourse](https://github.com/csymd/symcourse) `new` already
+   ran this installer). Kit-only stubs: `init --scaffold`.
    Optional `--docs <id>` copies a catalogued blank into `docs/` or
    `documents/` (copy-if-missing unless `--force`)
 5. Adapters — default grok

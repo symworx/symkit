@@ -10,6 +10,7 @@ FLOW
   2. init DIR        new workspace  (add --scaffold for folder stubs)
      install DIR     existing repo  (pass --scaffold only if you want stubs)
                      --docs ID      copy a catalogued blank (slos, aims, …)
+                     --migration-docs  local PDF/DOCX dump dir (teaching)
   3. Read the preview. Nothing is committed.
   4. In the target: git status. Commit public / student-safe paths only.
 
@@ -91,6 +92,13 @@ WHAT TO COMMIT IN THE TARGET
 ONE HARNESS PER TARGET
   Mixing prints a warning. Extra in-catalog packs: --also <pack>.
   --pack replaces the role's pack list and does not apply role skills.
+  Do not install teaching --role instructor then --role learner on one tree.
+
+COURSE REPOS
+  Usual teaching path: csymd/symcourse new (it runs this installer;
+  --symkit PATH if not on PATH). Do not pass --scaffold on that tree.
+  Kit-only folder stubs: init --scaffold.
+  --migration-docs: local PDF/DOCX dump dir (migrate-course skill).
 
 MORE
   docs/install.md    user how-to
@@ -130,6 +138,9 @@ mod tests {
             "staff / instructor / ta",
             "--also",
             "--docs",
+            "symcourse",
+            "--symkit",
+            "migration-docs",
         ] {
             assert!(g.contains(needle), "guide missing {needle:?}");
         }

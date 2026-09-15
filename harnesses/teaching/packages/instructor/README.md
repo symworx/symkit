@@ -2,7 +2,7 @@
 
 Adds the **instructor** agent and instructor-only *rules*. Skills
 (`course-prep`, `week-plan`, `assignment-review`, `accessibility-review`,
-and shared `write-gherkin` / `evaluate-content`) live in
+`migrate-course`, and shared `write-gherkin` / `evaluate-content`) live in
 `core/library/skills/` and are assigned in `catalog.yaml`.
 
 ```bash

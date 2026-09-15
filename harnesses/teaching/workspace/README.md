@@ -1,6 +1,9 @@
 # Course workspace
 
-Scaffolded by [symkit](https://github.com/csymd/symkit) (`teaching` harness).
+Folder stubs from [symkit](https://github.com/csymd/symkit) (`teaching`
+harness, `init --scaffold`). A full course image (uv, Containerfile, org
+identity) comes from [csymd/symcourse](https://github.com/csymd/symcourse)
+instead — do not pass `--scaffold` on that tree.
 
 ## Layout
 

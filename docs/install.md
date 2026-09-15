@@ -76,21 +76,49 @@ path. A compromised GitHub token or Actions workflow is the same
 and checksums make substitution harder to hide. We do not ship a
 `curl | sh` installer.
 
-## New workspace
+## Teaching course (usual)
+
+A full course repository (layout, identity, optional uv/Containerfile) is
+[csymd/symcourse](https://github.com/csymd/symcourse). `symcourse new` runs
+this installer for you:
+
+```bash
+# from a symcourse clone; --symkit points at this kit if it is not on PATH
+./cli/symcourse new bio-101 \
+  --course-number "BIO 101" --course-title "Intro Biology" \
+  --symkit /path/to/symkit
+```
+
+That is equivalent to, on an existing course tree (no `--scaffold`):
+
+```bash
+symkit install /path/to/course --harness teaching --role instructor --docs slos --yes
+```
+
+`--docs slos` copies a faculty-owned SLO blank into `docs/` (or
+`documents/` if that is the only docs tree). It does not overwrite an
+existing file unless you pass `--force`. `symkit show teaching` and
+`symkit show research` list template ids (teaching: `slos`; research:
+`aims`, `protocol`).
+
+## New workspace (kit-only stubs, or other harnesses)
+
+Folder stubs plus agent packs when you are **not** using symcourse:
 
 ```bash
 symkit init /path/to/new-course \
   --harness teaching --role instructor --scaffold --docs slos --yes
+symkit init /path/to/new-study \
+  --harness research --role researcher --scaffold --docs aims --yes
 ```
 
 Creates the directory if needed, copies the harness workspace template,
 merges agent packs, writes the grok adapter, and updates `.gitignore`.
-`--docs slos` copies a faculty-owned SLO blank into `docs/` (or
-`documents/` if that is the only docs tree). It does not overwrite an
-existing file unless you pass `--force`.
+Do not pass `--scaffold` on a tree `symcourse` already created.
 
-`symkit show teaching` and `symkit show research` list template ids
-(teaching: `slos`; research: `aims`, `protocol`).
+`--migration-docs` creates `migration-docs/` for legacy PDF/Word import
+(instructor skill `migrate-course`). Dumps are gitignored. On a TTY,
+teaching `init` asks unless you passed `--yes` or `--no-migration-docs`.
 
 ## Existing repo
 
@@ -122,3 +150,8 @@ Default: `grok` only.
 - Do not run init/install against the symkit repo itself.
 - Do not commit `.agents/`, `.grok/`, `.claude/`, `.codex/`, or `.symkit/`.
 - Do not push staff/instructor/ta packs to a student-visible branch.
+- Do not pass `--scaffold` on a tree created by `symcourse`.
+- Do not install teaching `--role instructor` and then `--role learner` on
+  the same tree (learner prune strips instructor agents).
+- Pack `docs/` (literacy, AI policy) do not overwrite existing files unless
+  `--force`. Re-install still refreshes `.agents/`.

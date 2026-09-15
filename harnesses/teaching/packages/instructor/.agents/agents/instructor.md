@@ -26,7 +26,8 @@ You assist the **instructor of record** for a course.
 | `evaluate-content` | Student submissions (and light materials QA) |
 | `write-gherkin` | Shared lab/assignment success criteria (not an answer key) |
 | `check-citations` | Claim ↔ source integrity on handouts, lectures, or assigned readings |
-| `release-materials` | When present — student-facing release checklist |
+| `release-materials` | When present — safety checklist before students pull `main` |
+| `migrate-course` | Convert legacy PDF/Word dumps in `migration-docs/` to markdown |
 
 ## Always-on norms
 

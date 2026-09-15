@@ -30,7 +30,10 @@ use crate::{
         merge_tree,
         merge_tree_safe,
     },
-    gitignore::ensure_agent_gitignore,
+    gitignore::{
+        ensure_agent_gitignore,
+        ensure_migration_gitignore,
+    },
     kit::is_kit_root,
 };
 
@@ -47,6 +50,7 @@ pub struct InstallRequest {
     pub dry_run: bool,
     pub docs: Vec<String>,
     pub docs_root: Option<String>,
+    pub migration_docs: bool,
 }
 
 pub fn preview(req: &InstallRequest, docs_root: &str) {
@@ -103,6 +107,9 @@ pub fn preview(req: &InstallRequest, docs_root: &str) {
                 println!("          {id} → {docs_root}/{}", tmpl.dest_name());
             }
         }
+    }
+    if req.migration_docs {
+        println!("Migration-docs: 1 (dumps gitignored; README tracked)");
     }
 }
 
@@ -192,7 +199,14 @@ pub fn run(req: &InstallRequest) -> Result<()> {
 
     let mut wrote_overlay = false;
     for pkg in &req.resolved.packages {
-        wrote_overlay |= install_package(&req.kit_root, &req.target, &req.catalog, &req.resolved.harness, pkg)?;
+        wrote_overlay |= install_package(
+            &req.kit_root,
+            &req.target,
+            &req.catalog,
+            &req.resolved.harness,
+            pkg,
+            req.force,
+        )?;
     }
     if wrote_overlay {
         ensure_agents_md_pointer(
@@ -213,6 +227,12 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     println!();
     println!("Ensuring agent trees are gitignored...");
     ensure_agent_gitignore(&req.target)?;
+
+    if req.migration_docs {
+        println!();
+        write_migration_docs(&req.kit_root, &req.target, req.force)?;
+        ensure_migration_gitignore(&req.target)?;
+    }
 
     println!();
     write_install_state(&req.target, &req.catalog, &req.resolved, &req.adapters)?;
@@ -249,7 +269,39 @@ fn scaffold_workspace(kit: &Path, target: &Path, rel: &str, force: bool) -> Resu
     Ok(())
 }
 
-fn install_package(kit: &Path, target: &Path, catalog: &Catalog, harness: &str, name: &str) -> Result<bool> {
+fn write_migration_docs(kit: &Path, target: &Path, force: bool) -> Result<()> {
+    let dest_dir = target.join("migration-docs");
+    fs::create_dir_all(&dest_dir)?;
+    let dest = dest_dir.join("README.md");
+    if dest.exists() && !force {
+        println!("  skip existing migration-docs/README.md");
+        return Ok(());
+    }
+    let src = kit
+        .join("core")
+        .join("templates")
+        .join("migration-docs")
+        .join("README.md");
+    if src.is_file() {
+        fs::copy(&src, &dest)?;
+    } else {
+        fs::write(
+            &dest,
+            "# migration-docs\n\nDrop legacy PDF or Word files here. Convert with `migrate-course`.\nDumps are gitignored except this README.\n",
+        )?;
+    }
+    println!("  migration-docs/README.md");
+    Ok(())
+}
+
+fn install_package(
+    kit: &Path,
+    target: &Path,
+    catalog: &Catalog,
+    harness: &str,
+    name: &str,
+    force: bool,
+) -> Result<bool> {
     let rel = catalog.package_path(harness, name)?;
     let src = kit.join(&rel);
     if !src.is_dir() {
@@ -282,8 +334,15 @@ fn install_package(kit: &Path, target: &Path, catalog: &Catalog, harness: &str, 
     )?;
     let docs = src.join("docs");
     if docs.is_dir() {
-        merge_tree(&docs, &target.join("docs"))?;
+        // Committed course docs (AI policy, literacy) skip if present, like
+        // --docs and --scaffold. .agents/ still overwrites: the kit owns those.
+        let copied = merge_tree_safe(&docs, &target.join("docs"), force)?;
         println!("  docs/ ← {}/docs/", rel.display());
+        for item in copied {
+            if let Some(skipped) = item.strip_prefix("skip ") {
+                println!("  skip existing docs/{skipped}");
+            }
+        }
     }
     Ok(wrote_overlay)
 }

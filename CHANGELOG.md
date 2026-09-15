@@ -9,7 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Teaching instructor/faculty skill `migrate-course`: convert local PDF/Word
+  dumps in `migration-docs/` to markdown. `--migration-docs` creates that
+  dir (TTY ask on teaching `init` unless `--yes`). Dumps are gitignored;
+  `README.md` may be tracked.
+
 ### Changed
+
+- Teaching docs state the split with
+  [csymd/symcourse](https://github.com/csymd/symcourse): this kit installs
+  agent packs (`--docs slos`); course runtime and identity are a different
+  tool. Do not pass `--scaffold` on a `symcourse` tree. Do not follow an
+  instructor install with a learner install on the same tree.
+- Pack `docs/` merge is copy-if-missing unless `--force` (same as `--docs`
+  and `--scaffold`). `.agents/` still overwrites. Teaching `--scaffold`
+  includes a short `docs/ai-what-to-expect.md` stub.
+- README / install / teaching harness docs lead with `symcourse new` as
+  the usual teaching path (`symkit install`, no `--scaffold`).
+- Teaching shared rules and `release-materials` no longer ask for
+  student-facing release notes. Learner packs stay learning-focused;
+  shipping checks remain faculty-only.
 
 
 ## [0.2.0] - 2026-09-02

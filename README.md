@@ -22,13 +22,15 @@ symkit guide
 ./cli/symkit list
 ./cli/symkit show teaching
  
-# New workspace (scaffold + instructor packs + grok adapter)
-symkit init /path/to/new-course \
-  --harness teaching --role instructor --scaffold --docs slos
+# Teaching course (usual): csymd/symcourse new calls this installer
+#   ./cli/symcourse new bio-101 --course-number "BIO 101" --course-title "…" \
+#     --symkit /path/to/this/checkout
+# Equivalent, on an existing course tree (no --scaffold):
+symkit install /path/to/course --harness teaching --role instructor --docs slos
 
-# Existing repo
-symkit install /path/to/existing-study \
-  --harness research --role researcher
+# Kit-only teaching stubs, or any other harness (not a full course image)
+symkit init /path/to/new-study \
+  --harness research --role researcher --scaffold --docs aims
 ```
 
 The installer **does not commit**. Review the target, then commit only
@@ -80,7 +82,24 @@ never replaced. Canonical trees also include `.agents/` (+ `docs/`). Use
 | `materials` | shared only | Optional yes |
 
 Do not stack a full faculty tree and a full learner tree unless you pass both
-explicitly (`--pack`).
+explicitly (`--pack` / `--also`). Do not install `--role instructor` and then
+`--role learner` on the same tree (learner prune strips instructor agents).
+
+## Teaching courses and csymd/symcourse
+
+[csymd/symcourse](https://github.com/csymd/symcourse) owns **course runtime**
+(folders, identity, optional uv/Containerfile). This kit owns **agent packs**.
+
+The common teaching path is `symcourse new`, which runs
+`symkit install … --role instructor --docs slos` (no `--scaffold`). Pass
+`--symkit` to that command if this binary is not on `PATH`.
+
+`symkit init --scaffold` is for kit-only folder stubs or other harnesses
+(research, engineering, …). Do not pass `--scaffold` on a `symcourse` tree.
+
+`--migration-docs` (teaching `init` asks on a TTY) creates `migration-docs/`
+for legacy PDF/Word files. Convert with instructor skill `migrate-course`.
+Dumps stay gitignored.
 
 ## What to commit in a target repo
 

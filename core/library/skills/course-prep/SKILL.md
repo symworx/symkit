@@ -35,6 +35,7 @@ private prep or answer keys to student-facing trees.
 | Grade / feedback on a submission | `evaluate-content` |
 | Discuss a specific student’s engagement | engagement norms; keep non-identifying |
 | Student AI handout | edit `docs/ai-what-to-expect.md` (learner pack) |
+| Import old PDF/Word files | `migrate-course` |
 | TA workflow | stop — TAs do not run course-prep |
 
 ## Inputs to gather (if missing)

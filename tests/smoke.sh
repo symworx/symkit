@@ -47,6 +47,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 "$CLI" install "$T1" --harness teaching --role instructor --yes
 [[ -f "$T1/.agents/agents/instructor.md" ]] || fail "instructor agent"
 [[ -d "$T1/.agents/skills/course-prep" ]] || fail "course-prep after instructor"
+[[ -d "$T1/.agents/skills/migrate-course" ]] || fail "migrate-course after instructor"
 [[ -d "$T1/.agents/skills/accessibility-review" ]] || fail "accessibility-review after instructor"
 [[ -d "$T1/.grok/skills/course-prep" ]] || fail "grok adapter course-prep"
 [[ -d "$T1/.claude" ]] && fail "claude adapter should be absent by default"
@@ -55,6 +56,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 # TA prunes instructor-only
 "$CLI" install "$T1" --harness teaching --role ta --yes
 [[ -d "$T1/.agents/skills/course-prep" ]] && fail "course-prep should be pruned on ta"
+[[ -d "$T1/.agents/skills/migrate-course" ]] && fail "migrate-course should be pruned on ta"
 [[ -d "$T1/.agents/skills/accessibility-review" ]] && fail "accessibility-review should be pruned on ta"
 [[ -f "$T1/.agents/agents/instructor.md" ]] && fail "instructor agent should be pruned on ta"
 [[ -f "$T1/.agents/agents/ta.md" ]] || fail "ta agent"
@@ -68,6 +70,16 @@ mkdir -p "$T2"
 "$CLI" install "$T2" --harness teaching --role learner --yes --adapters none
 [[ -f "$T2/docs/ai-what-to-expect.md" ]] || fail "learner docs"
 [[ -f "$T2/.agents/agents/learner.md" ]] || fail "learner agent"
+[[ -d "$T2/.agents/skills/migrate-course" ]] && fail "migrate-course must not install on learner"
+# pack docs skip existing (course-owned AI policy)
+T_AI="$WORKDIR/keep-ai"
+mkdir -p "$T_AI/docs"
+printf 'course-owned-ai-policy\n' > "$T_AI/docs/ai-what-to-expect.md"
+"$CLI" install "$T_AI" --harness teaching --role learner --yes --adapters none
+grep -q course-owned-ai-policy "$T_AI/docs/ai-what-to-expect.md" || fail "pack docs must not clobber existing"
+[[ -f "$T_AI/docs/ai/workflow.md" ]] || fail "learner docs/ai still merge when missing"
+"$CLI" install "$T_AI" --harness teaching --role learner --yes --adapters none --force
+grep -q course-owned-ai-policy "$T_AI/docs/ai-what-to-expect.md" && fail "pack docs --force should replace"
 [[ -d "$T2/.agents/skills/evaluate-content" ]] && fail "staff skills must not install on learner"
 [[ -d "$T2/.agents/skills/write-gherkin" ]] && fail "write-gherkin must not install on learner"
 [[ -f "$T2/.agents/skills/lab-tutor/SKILL.md" ]] || fail "lab-tutor on learner"
@@ -78,10 +90,19 @@ T3="$WORKDIR/newcourse"
 "$CLI" init "$T3" --harness teaching --role materials --scaffold --yes
 [[ -f "$T3/assignments/README.md" ]] || fail "scaffold assignments"
 [[ -f "$T3/README.md" ]] || fail "scaffold README"
+[[ -f "$T3/docs/ai-what-to-expect.md" ]] || fail "scaffold AI policy stub"
+[[ -d "$T3/migration-docs" ]] && fail "scaffold --yes must not create migration-docs without --migration-docs"
 echo 'keep-me' > "$T3/README.md"
 "$CLI" init "$T3" --harness teaching --role materials --scaffold --yes
 grep -q keep-me "$T3/README.md" || fail "scaffold must not clobber README without --force"
 [[ -f "$T3/docs/slos.md" ]] && fail "scaffold must not copy slos.md without --docs"
+
+T_MIG="$WORKDIR/migrate-course"
+"$CLI" init "$T_MIG" --harness teaching --role instructor --scaffold --migration-docs --yes
+[[ -f "$T_MIG/migration-docs/README.md" ]] || fail "migration-docs README"
+grep -q 'BEGIN symkit migration-docs' "$T_MIG/.gitignore" || fail "migration-docs gitignore"
+grep -q 'migration-docs/\*\*' "$T_MIG/.gitignore" || fail "migration-docs glob"
+[[ -d "$T_MIG/.agents/skills/migrate-course" ]] || fail "migrate-course skill on instructor"
 
 # research + ai
 T4="$WORKDIR/study"
