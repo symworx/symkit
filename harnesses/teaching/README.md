@@ -32,8 +32,9 @@ Do not pass `--scaffold` on a tree `symcourse` already created. Do not install
 strips instructor agents).
 
 `--docs slos` copies a faculty-owned SLO blank into `docs/` or `documents/`
-(detected; pass `--docs-root` if both exist). It does not overwrite unless
-`--force`. That file is the published outcome list (`slos-as-truth`).
+only if it is missing (`--force` to replace). On a **symcourse** tree the
+scaffold already wrote `docs/slos.md` with course code and title; nested
+install skips it. That file is the published outcome list (`slos-as-truth`).
 Pack `docs/` (AI policy, literacy) are the same: skip existing files unless
 `--force`. `symkit show teaching` lists template ids.
 

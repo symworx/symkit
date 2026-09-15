@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `docs/slos.md` on a **symcourse** tree is written by the course scaffold
+  (code + title filled in). `--docs slos` still copies a blank only when
+  the file is missing (kit-only teaching stubs).
 - Teaching docs state the split with
   [csymd/symcourse](https://github.com/csymd/symcourse): this kit installs
   agent packs (`--docs slos`); course runtime and identity are a different

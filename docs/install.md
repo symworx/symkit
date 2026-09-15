@@ -96,8 +96,10 @@ symkit install /path/to/course --harness teaching --role instructor --docs slos 
 ```
 
 `--docs slos` copies a faculty-owned SLO blank into `docs/` (or
-`documents/` if that is the only docs tree). It does not overwrite an
-existing file unless you pass `--force`. `symkit show teaching` and
+`documents/` if that is the only docs tree) **only if the file is
+missing**. `symcourse new` already writes `docs/slos.md` with course
+code and title filled in; nested install will skip it. Use `--force` to
+replace a kit-only blank, not a filled course file. `symkit show teaching` and
 `symkit show research` list template ids (teaching: `slos`; research:
 `aims`, `protocol`).
 
