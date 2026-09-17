@@ -1,6 +1,6 @@
 # Performance workspace
 
-Scaffolded by [symkit](https://github.com/csymd/symkit) (`performance` harness).
+Scaffolded by [symkit](https://github.com/symworx/symkit) (`performance` harness).
 
 | Path | Purpose |
 |:-----|:--------|

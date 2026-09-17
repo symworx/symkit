@@ -1,6 +1,6 @@
 # Creative workspace
 
-Scaffolded by [symkit](https://github.com/csymd/symkit) (`creative` harness).
+Scaffolded by [symkit](https://github.com/symworx/symkit) (`creative` harness).
 
 | Path | Purpose |
 |:-----|:--------|

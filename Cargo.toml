@@ -1,15 +1,15 @@
-# Copyright (c) 2026, PalEm Dynamics LLC
+# Copyright (c) 2026, Nathaniel T. Berry
 # Licensed under the Apache License, Version 2.0.
 
 [package]
 name = "symkit"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.85"
-authors = ["PalEm Dynamics LLC"]
+authors = ["Nathaniel T. Berry"]
 license = "Apache-2.0"
 description = "Installable agent harnesses for teaching, research, AI, product, and engineering work"
-repository = "https://github.com/csymd/symkit"
+repository = "https://github.com/symworx/symkit"
 readme = "README.md"
 
 [[bin]]
