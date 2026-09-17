@@ -1,6 +1,6 @@
 # Product workspace
 
-Scaffolded by [symkit](https://github.com/csymd/symkit) (`product` harness).
+Scaffolded by [symkit](https://github.com/symworx/symkit) (`product` harness).
 
 | Path | Purpose |
 |:-----|:--------|

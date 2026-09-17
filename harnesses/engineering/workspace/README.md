@@ -1,6 +1,6 @@
 # Engineering workspace
 
-Scaffolded by [symkit](https://github.com/csymd/symkit) (`engineering` harness).
+Scaffolded by [symkit](https://github.com/symworx/symkit) (`engineering` harness).
 
 | Path | Purpose |
 |:-----|:--------|

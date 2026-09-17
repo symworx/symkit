@@ -9,7 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Teaching instructor/faculty skill `migrate-course`: convert local PDF/Word
+  dumps in `migration-docs/` to markdown. `--migration-docs` creates that
+  dir (TTY ask on teaching `init` unless `--yes`). Dumps are gitignored;
+  `README.md` may be tracked.
+
 ### Changed
+
+- Copyright holder updated to Nathaniel T. Berry
+- Repository URLs updated from `github.com/csymd` to `github.com/symworx`
+- `docs/slos.md` on a **symcourse** tree is written by the course scaffold
+  (code + title filled in). `--docs slos` still copies a blank only when
+  the file is missing (kit-only teaching stubs).
+- Teaching docs state the split with
+  [symworx/symcourse](https://github.com/symworx/symcourse): this kit installs
+  agent packs (`--docs slos`); course runtime and identity are a different
+  tool. Do not pass `--scaffold` on a `symcourse` tree. Do not follow an
+  instructor install with a learner install on the same tree.
+- Pack `docs/` merge is copy-if-missing unless `--force` (same as `--docs`
+  and `--scaffold`). `.agents/` still overwrites. Teaching `--scaffold`
+  includes a short `docs/ai-what-to-expect.md` stub.
+- README / install / teaching harness docs lead with `symcourse new` as
+  the usual teaching path (`symkit install`, no `--scaffold`).
+- Teaching shared rules and `release-materials` no longer ask for
+  student-facing release notes. Learner packs stay learning-focused;
+  shipping checks remain faculty-only.
 
 
 ## [0.2.0] - 2026-09-02
@@ -77,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Links
 
-[0.2.0]: https://github.com/csymd/symkit/releases/tag/v0.2.0
-[0.1.2]: https://github.com/csymd/symkit/releases/tag/v0.1.2
-[0.1.1]: https://github.com/csymd/symkit/releases/tag/v0.1.1
-[0.1.0]: https://github.com/csymd/symkit/releases/tag/v0.1.0
+[0.2.0]: https://github.com/symworx/symkit/releases/tag/v0.2.0
+[0.1.2]: https://github.com/symworx/symkit/releases/tag/v0.1.2
+[0.1.1]: https://github.com/symworx/symkit/releases/tag/v0.1.1
+[0.1.0]: https://github.com/symworx/symkit/releases/tag/v0.1.0
