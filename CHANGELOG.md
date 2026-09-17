@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed 
+
+## [0.2.1] - 2026-09-17
+### Added
+
 - Teaching instructor/faculty skill `migrate-course`: convert local PDF/Word
   dumps in `migration-docs/` to markdown. `--migration-docs` creates that
   dir (TTY ask on teaching `init` unless `--yes`). Dumps are gitignored;
