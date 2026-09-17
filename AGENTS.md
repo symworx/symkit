@@ -26,7 +26,9 @@ symkit is a **content + installer** kit, not an application server.
 ## Development focus
 
 Keep the installer catalog-driven and the teaching/research/ai harnesses
-honest about what they install.
+honest about what they install. Course **runtime** and identity (uv,
+Containerfile, org overlays) belong in `csymd/symcourse`, not new
+`symkit` flags. `--scaffold` is folder stubs only.
 
 ### Do not break
 

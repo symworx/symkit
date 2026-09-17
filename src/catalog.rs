@@ -156,6 +156,9 @@ pub struct Harness {
     pub default_role: String,
     #[serde(default)]
     pub workspace: String,
+    /// Offer a local `migration-docs/` dump dir (PDF/DOCX import).
+    #[serde(default)]
+    pub offer_migration_docs: bool,
     #[serde(default)]
     pub templates: BTreeMap<String, DocTemplate>,
     #[serde(default)]
@@ -488,6 +491,7 @@ mod tests {
         assert!(r.skills.contains(&"check-citations".into()));
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"course-prep".into()));
+        assert!(r.skills.contains(&"migrate-course".into()));
         assert_eq!(r.library_skills, "core/library/skills");
     }
 
@@ -508,6 +512,7 @@ mod tests {
         assert!(r.skills.contains(&"lab-tutor".into()));
         assert!(!r.skills.contains(&"write-gherkin".into()));
         assert!(!r.skills.contains(&"evaluate-content".into()));
+        assert!(!r.skills.contains(&"migrate-course".into()));
     }
 
     #[test]

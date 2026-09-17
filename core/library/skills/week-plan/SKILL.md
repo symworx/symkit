@@ -33,7 +33,7 @@ student lists.
 | Design a new module or lab from scratch | `course-prep` |
 | Full assignment rewrite / deep handout QA | `assignment-review` |
 | Grade student work | `evaluate-content` |
-| Tag a student release | `release-materials` |
+| Safety-check materials before students pull `main` | `release-materials` |
 
 ## Inputs (ask if missing)
 

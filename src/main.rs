@@ -115,6 +115,12 @@ struct WorkArgs {
     /// Copy harness workspace stubs (no overwrite unless --force)
     #[arg(long)]
     scaffold: bool,
+    /// Create migration-docs/ for PDF/DOCX import (dumps gitignored)
+    #[arg(long)]
+    migration_docs: bool,
+    /// Do not create migration-docs/
+    #[arg(long)]
+    no_migration_docs: bool,
     /// Copy a catalogued doc template (repeatable). `symkit show <harness>` lists ids
     #[arg(long = "docs", action = clap::ArgAction::Append, value_name = "ID")]
     docs: Vec<String>,
@@ -263,6 +269,27 @@ fn cmd_init(kit_root: &Path, catalog: &Catalog, mut args: WorkArgs) -> Result<()
         }
     }
 
+    if !args.migration_docs
+        && !args.no_migration_docs
+        && !args.yes
+        && io::stdin().is_terminal()
+    {
+        if catalog
+            .harness(&harness)
+            .map(|h| h.offer_migration_docs)
+            .unwrap_or(false)
+        {
+            print!("Create migration-docs/ for PDF/DOCX import (dumps gitignored)? [y/N] ");
+            io::stdout().flush()?;
+            let mut line = String::new();
+            io::stdin().read_line(&mut line)?;
+            match line.trim() {
+                "y" | "Y" | "yes" | "YES" => args.migration_docs = true,
+                _ => {}
+            }
+        }
+    }
+
     std::fs::create_dir_all(&target_arg)?;
     let target = std::fs::canonicalize(&target_arg)?;
     run_work(kit_root, catalog, args, harness, target, true)
@@ -279,6 +306,13 @@ fn run_work(
     if is_kit_root(&target) {
         return Err(Error::RefuseSelfInstall);
     }
+
+    if args.migration_docs && args.no_migration_docs {
+        return Err(Error::Msg(
+            "pass only one of --migration-docs or --no-migration-docs".into(),
+        ));
+    }
+    let migration_docs = args.migration_docs && !args.no_migration_docs;
 
     let adapters = resolve_adapters(
         args.adapters.as_deref(),
@@ -314,6 +348,7 @@ fn run_work(
         dry_run: args.dry_run,
         docs: args.docs,
         docs_root: args.docs_root,
+        migration_docs,
     };
     install::run(&req)
 }

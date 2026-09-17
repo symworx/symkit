@@ -1,8 +1,9 @@
 ---
 name: release-materials
 description: >
-  Prepare a student-facing course materials release. Use when cutting a
-  release, tagging materials, or checking a branch before students pull main.
+  Faculty checklist before merging course materials to the student-facing
+  branch. Use when checking a drop for restricted data, secrets, or answer
+  keys. Not for drafting student-facing release notes.
 ---
 
 <!--
@@ -12,8 +13,8 @@ Licensed under the Apache License, Version 2.0.
 
 # Release materials
 
-Faculty checklist for shipping course materials. Adapt to the target repo’s
-CONTRIBUTING.md.
+Faculty safety checklist before students pull an updated `main`. Adapt to the
+target repo’s CONTRIBUTING.md. Do not draft student-facing release notes.
 
 ## 1. Intent
 
@@ -45,13 +46,7 @@ Typical flow (confirm in repo docs):
 2. Merge to `main` as documented.
 3. Tag a release when the course process requires it.
 
-## 5. Communicate
-
-- Short student-facing release notes: what changed, what to pull, any action
-  required.
-- Point graded work back to the **LMS** when relevant.
-
 ## Output
 
-Produce a concise checklist result (pass/fail items) and a draft release blurb
-faculty can edit.
+Produce a concise checklist result (pass/fail items). Do not write a student
+announcement or changelog unless the faculty asked for one in their own words.

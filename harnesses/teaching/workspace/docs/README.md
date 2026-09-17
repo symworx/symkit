@@ -9,7 +9,7 @@ docs/
   syllabus.md
   slos.md                # course outcomes; copy with: --docs slos
   modules/
-  ai-what-to-expect.md   # from learner pack when installed
+  ai-what-to-expect.md   # stub from --scaffold; course or learner pack skip if present
   ai/                    # workflow guides when learner pack is installed
 ```
 
