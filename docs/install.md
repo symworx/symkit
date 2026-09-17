@@ -1,6 +1,6 @@
 # Install
 
-Prebuilt binaries ship on [GitHub Releases](https://github.com/csymd/symkit/releases)
+Prebuilt binaries ship on [GitHub Releases](https://github.com/symworx/symkit/releases)
 (Linux, macOS, Windows). No Rust toolchain required.
 
 ```bash
@@ -27,7 +27,7 @@ Each archive is the binary plus `LICENSE`. `SHA256SUMS` is attached to the
 release. Optional provenance check (GitHub CLI):
 
 ```bash
-gh attestation verify symkit-<version>-<target>.tar.gz --repo csymd/symkit
+gh attestation verify symkit-<version>-<target>.tar.gz --repo symworx/symkit
 sha256sum -c SHA256SUMS
 ```
 
@@ -51,7 +51,7 @@ Same embed and extract path as the GitHub binary.
 ## From a clone
 
 ```bash
-git clone https://github.com/csymd/symkit.git
+git clone https://github.com/symworx/symkit.git
 cd symkit
 ./cli/symkit --help    # builds target/debug/symkit if needed
 ```
@@ -64,7 +64,7 @@ with `SYMKIT_DATA`.
 
 A GitHub Release binary is a compiled blob. Treat it like any other
 CLI download: prefer the asset from [this repo's Releases
-page](https://github.com/csymd/symkit/releases), check `SHA256SUMS`,
+page](https://github.com/symworx/symkit/releases), check `SHA256SUMS`,
 and use `gh attestation verify` if you want the build tied back to the
 tag's Actions run.
 

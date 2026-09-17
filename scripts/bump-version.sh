@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2026, PalEm Dynamics LLC
+# Copyright (c) 2026, Nathaniel T. Berry
 # Licensed under the Apache License, Version 2.0.
 #
 # Bump the symkit crate version.
@@ -315,7 +315,7 @@ EOF
     awk -v ver="$new" '
       /^## Version Links/ { print; next }
       /^\[0\.1\.0\]:/ && !done {
-        print "[" ver "]: https://github.com/csymd/symkit/releases/tag/v" ver
+        print "[" ver "]: https://github.com/symworx/symkit/releases/tag/v" ver
         done=1
       }
       { print }

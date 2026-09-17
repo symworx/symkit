@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
 ### Changed
+
+- Copyright holder updated to Nathaniel T. Berry
+- Repository URLs updated from `github.com/csymd` to `github.com/symworx`
 
 
 ## [0.2.0] - 2026-09-02
@@ -77,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Links
 
-[0.2.0]: https://github.com/csymd/symkit/releases/tag/v0.2.0
-[0.1.2]: https://github.com/csymd/symkit/releases/tag/v0.1.2
-[0.1.1]: https://github.com/csymd/symkit/releases/tag/v0.1.1
-[0.1.0]: https://github.com/csymd/symkit/releases/tag/v0.1.0
+[0.2.0]: https://github.com/symworx/symkit/releases/tag/v0.2.0
+[0.1.2]: https://github.com/symworx/symkit/releases/tag/v0.1.2
+[0.1.1]: https://github.com/symworx/symkit/releases/tag/v0.1.1
+[0.1.0]: https://github.com/symworx/symkit/releases/tag/v0.1.0

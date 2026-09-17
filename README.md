@@ -12,7 +12,7 @@ Provided via the cSYMd lab.
 
 ```bash
 # GitHub Release (no Rust toolchain): pick your OS/arch from
-# https://github.com/csymd/symkit/releases
+# https://github.com/symworx/symkit/releases
 # crates.io (needs Rust; same embed)
 cargo install --locked symkit
 symkit --help
@@ -119,4 +119,4 @@ catalog and harness trees. Outside a checkout, the CLI extracts them to
 
 Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
 
-Copyright (c) 2026, PalEm Dynamics LLC.
+Copyright (c) 2026, Nathaniel T. Berry.

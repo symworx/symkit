@@ -145,13 +145,13 @@ role matrix. Copy `examples/teaching-overlay/` for the overlay pattern.
 ### Copyright headers
 
 Apache 2.0 covers the repo via [`LICENSE`](LICENSE), [`NOTICE.md`](NOTICE.md),
-the README license section, and `Cargo.toml`. Copyright is PalEm Dynamics LLC.
+the README license section, and `Cargo.toml`. Copyright is Nathaniel T. Berry.
 Do not stamp every file.
 
 Use this two-line header (comment syntax for the file type):
 
 ```
-Copyright (c) 2026, PalEm Dynamics LLC
+Copyright (c) 2026, Nathaniel T. Berry
 Licensed under the Apache License, Version 2.0.
 ```
 
@@ -233,7 +233,7 @@ artifact attestations for each archive.
 
 ## Releasing
 
-Users install from [GitHub Releases](https://github.com/csymd/symkit/releases)
+Users install from [GitHub Releases](https://github.com/symworx/symkit/releases)
 (prebuilt binary; no Rust), with `cargo install --locked symkit`, or by
 cloning this repo and running `./cli/symkit`.
 

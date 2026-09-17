@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2026, PalEm Dynamics LLC
+# Copyright (c) 2026, Nathaniel T. Berry
 # Licensed under the Apache License, Version 2.0.
 
 # Smoke tests for cli/symkit. Run from repo root: ./tests/smoke.sh
@@ -23,7 +23,7 @@ pass() { echo "ok  $*"; }
 "$CLI" --help | grep -q 'symkit guide' || fail "help points at guide"
 "$CLI" guide | grep -q 'cargo install' || fail "guide cargo install"
 "$CLI" guide | grep -q 'GitHub Release' || fail "guide GitHub Release"
-"$CLI" guide | grep -q 'csymd/symkit/releases' || fail "guide releases URL"
+"$CLI" guide | grep -q 'symworx/symkit/releases' || fail "guide releases URL"
 "$CLI" init --help | grep -q 'Target directory' || fail "init flag help"
 "$CLI" init --help | grep -q -- '--docs' || fail "init --docs flag"
 "$CLI" show teaching | grep -q '^slos	' || fail "show teaching slos template"

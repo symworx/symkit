@@ -1,4 +1,4 @@
-// Copyright (c) 2026, PalEm Dynamics LLC
+// Copyright (c) 2026, Nathaniel T. Berry
 // Licensed under the Apache License, Version 2.0.
 
 //! Top-level help copy. Keep this aligned with README.md and docs/install.md.
@@ -43,10 +43,10 @@ WHAT THIS IS
   not commit, push, or talk to the network.
 
 HOW TO GET THE BINARY
-  GitHub Release           # https://github.com/csymd/symkit/releases
+  GitHub Release           # https://github.com/symworx/symkit/releases
                            # Linux / macOS / Windows archives; no Rust
                            # toolchain. SHA256SUMS on the release; optional:
-                           #   gh attestation verify FILE --repo csymd/symkit
+                           #   gh attestation verify FILE --repo symworx/symkit
   cargo install --locked symkit
                            # compile from crates.io (needs Rust)
   ./cli/symkit …           # from a clone; uses that checkout
