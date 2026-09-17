@@ -66,10 +66,7 @@ pub fn ensure_migration_gitignore(target: &Path) -> Result<String> {
     let mut f = OpenOptions::new().append(true).open(&gi)?;
     writeln!(f)?;
     writeln!(f, "{MIG_BEGIN}")?;
-    writeln!(
-        f,
-        "# Local PDF/Word dumps for migrate-course; README may be tracked"
-    )?;
+    writeln!(f, "# Local PDF/Word dumps for migrate-course; README may be tracked")?;
     for p in MIG_PATTERNS {
         writeln!(f, "{p}")?;
     }
@@ -107,9 +104,6 @@ mod tests {
         assert!(text.contains("!migration-docs/README.md"));
         ensure_migration_gitignore(dir.path()).unwrap();
         let again = fs::read_to_string(dir.path().join(".gitignore")).unwrap();
-        assert_eq!(
-            again.matches("# BEGIN symkit migration-docs").count(),
-            1
-        );
+        assert_eq!(again.matches("# BEGIN symkit migration-docs").count(), 1);
     }
 }

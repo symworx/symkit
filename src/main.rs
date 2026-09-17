@@ -269,11 +269,7 @@ fn cmd_init(kit_root: &Path, catalog: &Catalog, mut args: WorkArgs) -> Result<()
         }
     }
 
-    if !args.migration_docs
-        && !args.no_migration_docs
-        && !args.yes
-        && io::stdin().is_terminal()
-    {
+    if !args.migration_docs && !args.no_migration_docs && !args.yes && io::stdin().is_terminal() {
         if catalog
             .harness(&harness)
             .map(|h| h.offer_migration_docs)
