@@ -269,20 +269,22 @@ fn cmd_init(kit_root: &Path, catalog: &Catalog, mut args: WorkArgs) -> Result<()
         }
     }
 
-    if !args.migration_docs && !args.no_migration_docs && !args.yes && io::stdin().is_terminal() {
-        if catalog
+    if !args.migration_docs
+        && !args.no_migration_docs
+        && !args.yes
+        && io::stdin().is_terminal()
+        && catalog
             .harness(&harness)
             .map(|h| h.offer_migration_docs)
             .unwrap_or(false)
-        {
-            print!("Create migration-docs/ for PDF/DOCX import (dumps gitignored)? [y/N] ");
-            io::stdout().flush()?;
-            let mut line = String::new();
-            io::stdin().read_line(&mut line)?;
-            match line.trim() {
-                "y" | "Y" | "yes" | "YES" => args.migration_docs = true,
-                _ => {}
-            }
+    {
+        print!("Create migration-docs/ for PDF/DOCX import (dumps gitignored)? [y/N] ");
+        io::stdout().flush()?;
+        let mut line = String::new();
+        io::stdin().read_line(&mut line)?;
+        match line.trim() {
+            "y" | "Y" | "yes" | "YES" => args.migration_docs = true,
+            _ => {}
         }
     }
 
