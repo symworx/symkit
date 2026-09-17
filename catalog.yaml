@@ -1,4 +1,4 @@
-# Copyright (c) 2026, PalEm Dynamics LLC
+# Copyright (c) 2026, Nathaniel T. Berry
 # Licensed under the Apache License, Version 2.0.
 
 # symkit catalog — single source of truth for cli/symkit
@@ -45,6 +45,7 @@ harnesses:
     status: active
     description: Course materials, staff and learner agents, assignment structure
     default_role: instructor
+    offer_migration_docs: true
     workspace: harnesses/teaching/workspace
     templates:
       slos:
@@ -52,7 +53,7 @@ harnesses:
         dest: slos.md
     packages:
       shared:
-        description: Materials AGENTS, release checklist, course-materials rules
+        description: Materials AGENTS, course-materials and slos-as-truth rules
         path: harnesses/teaching/packages/shared
         student_safe: true
       staff:
@@ -76,12 +77,14 @@ harnesses:
         packages: [shared, staff, instructor]
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
-           assignment-review, accessibility-review, release-materials]
+           assignment-review, accessibility-review, release-materials,
+           migrate-course]
       faculty:
         packages: [shared, staff, instructor]
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
-           assignment-review, accessibility-review, release-materials]
+           assignment-review, accessibility-review, release-materials,
+           migrate-course]
       ta:
         packages: [shared, staff, ta]
         skills: [write-gherkin, evaluate-content]
