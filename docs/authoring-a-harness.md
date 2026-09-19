@@ -24,7 +24,8 @@ Add the harness under `harnesses:` in `catalog.yaml`:
 - `status: active` (or `later` to list but refuse install)
 - `packages` with `path` and `student_safe`
 - `roles` mapping role → `packages:` plus `skills:` (library names)
-- `prune` for leftover agents/rules when switching roles (skills are derived)
+- `prune` for leftover agents/rules when switching roles (skills are derived).
+  If a role package ships extra specialist agents, list those filenames too.
 - `workspace` path if you have a scaffold
 - optional `templates:` map (`id: { path, dest }`) for `--docs <id>` blanks.
   Teaching ships `slos`; research ships `aims` and `protocol`. Product,
@@ -45,6 +46,12 @@ The installer is Rust (`src/`); you do not register packs in code.
 Skill **bodies** live in `core/library/skills/<name>/SKILL.md`. Who receives
 them is `catalog.yaml`: `core.always_skills` (every install) plus each
 role’s `skills:` list. Do not copy a skill into more than one package.
+
+A role package may ship extra `.agents/agents/*.md` specialists (copywriter
+under creative-director, for example). The role agent is the session;
+specialists are optional children, not a required pipeline. Do not add a
+nested supervisor — vendor tools only let the root session spawn. Keep
+spawn notes short so the session can still do the work itself.
 
 ## Overlays vs new harnesses
 

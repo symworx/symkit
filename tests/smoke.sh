@@ -140,10 +140,19 @@ TC="$WORKDIR/creative"
 "$CLI" init "$TC" --harness creative --role creative-director --scaffold --yes
 [[ -f "$TC/docs/brand/README.md" ]] || fail "creative scaffold brand"
 [[ -f "$TC/.agents/agents/creative-director.md" ]] || fail "creative-director agent"
+[[ -f "$TC/.agents/agents/copywriter.md" ]] || fail "copywriter agent"
+[[ -f "$TC/.agents/agents/editor.md" ]] || fail "editor agent"
+[[ -f "$TC/.grok/agents/copywriter.md" ]] || fail "grok adapter copywriter"
 [[ -f "$TC/.agents/skills/naming/SKILL.md" ]] || fail "naming on creative"
 [[ -f "$TC/.agents/rules/brand.md" ]] || fail "brand rule"
 [[ -d "$TC/.agents/skills/write-prd" ]] && fail "write-prd must not install on creative"
 [[ -f "$TC/.agents/agents/product-manager.md" ]] && fail "pm agent must not install on creative"
+"$CLI" install "$TC" --harness creative --role materials --yes
+[[ -f "$TC/.agents/agents/creative-director.md" ]] && fail "cd agent should be pruned on materials"
+[[ -f "$TC/.agents/agents/copywriter.md" ]] && fail "copywriter should be pruned on materials"
+[[ -f "$TC/.agents/agents/editor.md" ]] && fail "editor should be pruned on materials"
+[[ -f "$TC/.grok/agents/copywriter.md" ]] && fail "grok copywriter should be pruned on materials"
+[[ -f "$TC/.agents/rules/brand.md" ]] || fail "brand rule stays on materials"
 
 # performance harness
 T9="$WORKDIR/perf"

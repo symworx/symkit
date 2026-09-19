@@ -602,6 +602,14 @@ mod tests {
     }
 
     #[test]
+    fn resolve_creative_materials_prunes_specialists() {
+        let cat = load_repo();
+        let r = cat.resolve("creative", Some("materials"), &[]).unwrap();
+        assert_eq!(r.packages, ["shared"]);
+        assert_eq!(r.prune.agents, ["creative-director", "copywriter", "editor"]);
+    }
+
+    #[test]
     fn resolve_engineer() {
         let cat = load_repo();
         let r = cat.resolve("engineering", Some("swe"), &[]).unwrap();

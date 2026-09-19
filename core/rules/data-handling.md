@@ -15,7 +15,8 @@ Domain-agnostic defaults. A harness may add stricter rules.
 ## Never commit
 
 - Credentialed, DUA-restricted, or clinical extracts
-- Real patient, student, or participant identifiers
+- Real patient, student, participant, or other personal identifiers
+  (names, emails, grades) in files, filenames, issues, or commit messages
 - Large private dumps (`.duckdb`, restricted `.parquet`, raw device stores)
 - API keys, `.env` secrets, tokens
 
@@ -28,4 +29,5 @@ Domain-agnostic defaults. A harness may add stricter rules.
 ## Sharing
 
 - Do not upload restricted files to unapproved cloud tools or public gists.
+- Do not paste identifiers into consumer AI tools.
 - Do not ask agents to “store” or “check in” restricted data for convenience.

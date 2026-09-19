@@ -195,7 +195,7 @@ harnesses:
         path: harnesses/creative/packages/shared
         student_safe: true
       creative-director:
-        description: Creative-director agent
+        description: Creative-director agent plus copywriter and editor specialists
         path: harnesses/creative/packages/creative-director
         student_safe: true
     roles:
@@ -212,7 +212,7 @@ harnesses:
         skills: [brand-voice, accessibility-review]
     prune:
       materials:
-        agents: [creative-director]
+        agents: [creative-director, copywriter, editor]
 
   performance:
     status: active
