@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Optional `dadbot` persona (`core/packs/dadbot`). Registered on every harness,
+  omitted from every default role. `symkit install … --also dadbot` adds the
+  agent without replacing `AGENTS-SYMKIT.md`.
+
 ### Changed
 
 - GitHub Flow: default branch is `worx`; releases are tags on `worx` (no `stage` / `main` promotion). 

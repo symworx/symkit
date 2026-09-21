@@ -72,6 +72,10 @@ harnesses:
         description: Student literacy docs plus learner agent and study skills
         path: harnesses/teaching/packages/learner
         student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
+        student_safe: true
     roles:
       instructor:
         packages: [shared, staff, instructor]
@@ -124,6 +128,10 @@ harnesses:
         description: Research AGENTS, aims-as-truth, layout conventions
         path: harnesses/research/packages/shared
         student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
+        student_safe: true
     roles:
       researcher:
         packages: [shared]
@@ -144,6 +152,10 @@ harnesses:
       shared:
         description: Experiment AGENTS, config-as-source, eval-run skill
         path: harnesses/ai/packages/shared
+        student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
         student_safe: true
     roles:
       experimenter:
@@ -167,6 +179,10 @@ harnesses:
       product-manager:
         description: Product-manager agent
         path: harnesses/product/packages/product-manager
+        student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
         student_safe: true
     roles:
       product-manager:
@@ -198,6 +214,10 @@ harnesses:
         description: Creative-director agent
         path: harnesses/creative/packages/creative-director
         student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
+        student_safe: true
     roles:
       creative-director:
         packages: [shared, creative-director]
@@ -227,6 +247,10 @@ harnesses:
       coach:
         description: Coach agent (physiology + biomechanics)
         path: harnesses/performance/packages/coach
+        student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
         student_safe: true
     roles:
       coach:
@@ -259,6 +283,10 @@ harnesses:
       engineer:
         description: Engineer / SWE agent
         path: harnesses/engineering/packages/engineer
+        student_safe: true
+      dadbot:
+        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
+        path: core/packs/dadbot
         student_safe: true
     roles:
       engineer:

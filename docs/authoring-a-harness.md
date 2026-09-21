@@ -52,3 +52,9 @@ role’s `skills:` list. Do not copy a skill into more than one package.
   Use for one course or lab’s rules.
 - **New harness:** different domain (layout, roles, skills). Use when teaching
   conventions would be the wrong default.
+
+A persona that is not a domain lives once under `core/packs/<name>/` and is
+registered on each harness with that same path. `dadbot` is that pattern:
+agent file only, no `AGENTS.md`, not listed on any role. Install with
+`--also dadbot`. Do not add it to a role `prune:` list; a later install of
+that role would delete it.

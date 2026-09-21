@@ -54,6 +54,8 @@ Containerfile, org overlays) belong in `csymd/symcourse`, not new
 - Keep package `AGENTS.md` short. Long procedures belong in `SKILL.md`.
 - One harness per target (warn if a second is installed). Do not invent
   multi-harness merge semantics.
+- `dadbot` stays off default roles and has no pack `AGENTS.md`. Do not prune
+  it from a role list.
 - Copyright headers: engine (`src/`, CLI) and pack-owned installed content
   (`AGENTS-SYMKIT.md` from package `AGENTS.md`, `.agents/`, pack `docs/`,
   `core/rules/`, `core/library/skills/`). Not on workspace stubs, the
@@ -102,6 +104,7 @@ Requires rustup with **stable** (build/clippy/test) and **nightly**
 | [`cli/symkit`](cli/symkit) | Shim that builds/execs the debug binary |
 | [`core/rules/`](core/rules/) | Always installed (`data-handling`, `secrets`) |
 | [`core/library/skills/`](core/library/skills/) | Skill bodies; `catalog.yaml` assigns them to roles |
+| [`core/packs/dadbot/`](core/packs/dadbot/) | Optional persona; `--also dadbot`; no `AGENTS.md`; not on a default role |
 | [`tests/smoke.sh`](tests/smoke.sh) | Integration gate |
 | [`docs/authoring-a-harness.md`](docs/authoring-a-harness.md) | How to add a harness |
 
