@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-### Changed 
+### Changed
+
+- GitHub Flow: default branch is `worx`; releases are tags on `worx` (no `stage` / `main` promotion). 
 
 ## [0.2.1] - 2026-09-17
 ### Added
