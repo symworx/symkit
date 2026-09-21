@@ -73,7 +73,6 @@ catalog.yaml          harnesses, packages, roles, adapters (source of truth)
 cli/symkit            thin shim → target/debug/symkit
 core/rules/           installed into every target (.agents/rules/)
 core/library/skills/  skill bodies; catalog assigns which roles get them
-core/packs/dadbot/    optional persona on every harness; `--also dadbot`
 core/templates/       new-agent / new-rule / new-skill / new-harness
 harnesses/<name>/
   packages/<pkg>/     AGENTS.md, .agents/{rules,skills,agents}, docs/

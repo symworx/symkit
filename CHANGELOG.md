@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Optional `dadbot` persona (`core/packs/dadbot`). Registered on every harness,
-  omitted from every default role. `symkit install … --also dadbot` adds the
-  agent without replacing `AGENTS-SYMKIT.md`.
+- Entertainment harness. Default role `dadbot` (clean dad-joke persona).
+  No workspace scaffold. One harness per repo, same as the others.
 
 ### Changed
 

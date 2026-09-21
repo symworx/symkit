@@ -6,7 +6,7 @@ version: 4
 
 kit:
   name: symkit
-  description: Installable agent harnesses for teaching, research, AI, product, creative, performance, and engineering work
+  description: Installable agent harnesses for teaching, research, AI, product, creative, performance, engineering, and entertainment work
 
 adapters:
   default: [grok]
@@ -72,10 +72,6 @@ harnesses:
         description: Student literacy docs plus learner agent and study skills
         path: harnesses/teaching/packages/learner
         student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
-        student_safe: true
     roles:
       instructor:
         packages: [shared, staff, instructor]
@@ -128,10 +124,6 @@ harnesses:
         description: Research AGENTS, aims-as-truth, layout conventions
         path: harnesses/research/packages/shared
         student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
-        student_safe: true
     roles:
       researcher:
         packages: [shared]
@@ -152,10 +144,6 @@ harnesses:
       shared:
         description: Experiment AGENTS, config-as-source, eval-run skill
         path: harnesses/ai/packages/shared
-        student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
         student_safe: true
     roles:
       experimenter:
@@ -179,10 +167,6 @@ harnesses:
       product-manager:
         description: Product-manager agent
         path: harnesses/product/packages/product-manager
-        student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
         student_safe: true
     roles:
       product-manager:
@@ -214,10 +198,6 @@ harnesses:
         description: Creative-director agent
         path: harnesses/creative/packages/creative-director
         student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
-        student_safe: true
     roles:
       creative-director:
         packages: [shared, creative-director]
@@ -247,10 +227,6 @@ harnesses:
       coach:
         description: Coach agent (physiology + biomechanics)
         path: harnesses/performance/packages/coach
-        student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
         student_safe: true
     roles:
       coach:
@@ -284,10 +260,6 @@ harnesses:
         description: Engineer / SWE agent
         path: harnesses/engineering/packages/engineer
         student_safe: true
-      dadbot:
-        description: Optional clean dad-joke persona. Not in a default role; install with --also dadbot.
-        path: core/packs/dadbot
-        student_safe: true
     roles:
       engineer:
         packages: [shared, engineer]
@@ -301,3 +273,22 @@ harnesses:
     prune:
       materials:
         agents: [engineer]
+
+  entertainment:
+    status: active
+    description: Light entertainment. Dadbot is the default persona.
+    default_role: dadbot
+    packages:
+      shared:
+        description: Entertainment mission (AGENTS-SYMKIT.md)
+        path: harnesses/entertainment/packages/shared
+        student_safe: true
+      dadbot:
+        description: Clean dad-joke persona
+        path: harnesses/entertainment/packages/dadbot
+        student_safe: true
+    roles:
+      dadbot:
+        packages: [shared, dadbot]
+        skills: []
+    prune: {}

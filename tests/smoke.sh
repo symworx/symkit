@@ -164,23 +164,20 @@ TE="$WORKDIR/eng"
 [[ -f "$TE/.agents/skills/write-docs/SKILL.md" ]] || fail "write-docs on engineer"
 [[ -f "$TE/.agents/rules/match-repo.md" ]] || fail "match-repo rule"
 [[ -d "$TE/.agents/skills/write-prd" ]] && fail "write-prd must not install on engineering"
-[[ -f "$TE/.agents/agents/dadbot.md" ]] && fail "dadbot must not install on default engineer"
+[[ -f "$TE/.agents/agents/dadbot.md" ]] && fail "dadbot must not install on engineering"
 
-# dadbot is opt-in on every harness and does not replace the mission file
-for h in teaching research ai product creative performance engineering; do
-  "$CLI" show "$h" | grep -q '^dadbot	yes	core/packs/dadbot	' || fail "dadbot pack on $h"
-  if "$CLI" show "$h" | awk -F '\t' '$1 == "ROLE" { p = 1; next } p { print $2 }' | grep -qw dadbot; then
-    fail "dadbot listed on a role for $h"
-  fi
-done
-OVERLAY_BEFORE="$(cat "$TE/AGENTS-SYMKIT.md")"
-"$CLI" install "$TE" --harness engineering --role engineer --also dadbot --yes
-[[ -f "$TE/.agents/agents/dadbot.md" ]] || fail "dadbot agent after --also"
-[[ -f "$TE/.grok/agents/dadbot.md" ]] || fail "dadbot grok adapter"
-grep -q '^name: dadbot$' "$TE/.agents/agents/dadbot.md" || fail "dadbot frontmatter name"
-[[ "$(cat "$TE/AGENTS-SYMKIT.md")" == "$OVERLAY_BEFORE" ]] || fail "dadbot must not replace AGENTS-SYMKIT.md"
-[[ -f "$TE/.agents/agents/engineer.md" ]] || fail "engineer agent remains with dadbot"
-[[ -f "$T2/.agents/agents/dadbot.md" ]] && fail "dadbot must not install on learner"
+# entertainment harness (dadbot only; no scaffold)
+"$CLI" show entertainment | grep -q '^STATUS=active' || fail "entertainment active"
+"$CLI" show entertainment | grep -q '^dadbot	shared dadbot	' || fail "dadbot role packages"
+TF="$WORKDIR/fun"
+"$CLI" init "$TF" --harness entertainment --role dadbot --yes
+[[ -f "$TF/.agents/agents/dadbot.md" ]] || fail "dadbot agent"
+[[ -f "$TF/.grok/agents/dadbot.md" ]] || fail "dadbot grok adapter"
+grep -q '^name: dadbot$' "$TF/.agents/agents/dadbot.md" || fail "dadbot frontmatter name"
+grep -q 'Dadbot' "$TF/AGENTS-SYMKIT.md" || fail "entertainment mission"
+[[ -d "$TF/src" ]] && fail "entertainment must not scaffold src"
+[[ -f "$TF/.agents/skills/check-citations/SKILL.md" ]] || fail "always-on check-citations"
+[[ -d "$TF/.agents/skills/write-tests" ]] && fail "write-tests must not install on entertainment"
 
 # refuse kit root
 if "$CLI" install "$ROOT" --harness teaching --role materials --yes 2>"$WORKDIR/err2"; then

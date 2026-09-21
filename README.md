@@ -2,7 +2,7 @@
 
 **agentic harnesses** designed for educational purposes but available for all...
 
-Edit content once under `harnesses/`. Install into a teaching, research, experiment, product, creative, performance, or engineering repo so Grok,
+Edit content once under `harnesses/`. Install into a teaching, research, experiment, product, creative, performance, engineering, or entertainment repo so Grok,
 Claude Code, Codex, and similar tools share the same
 policies via thin path adapters.
 
@@ -42,11 +42,11 @@ student-safe / public paths.
 src/                  Rust installer (catalog, merge, adapters)
 core/rules/           always-on rules copied into every target
 core/library/skills/  skill bodies; catalog.yaml assigns them to roles
-core/packs/dadbot/    optional joke persona; `--also dadbot` (no default role)
 harnesses/
   ai/                 model-run and evaluation scaffolding
   creative/           voice, naming, copy, asset briefs
   engineering/        software implementation and tests; role: engineer
+  entertainment/      light entertainment; role: dadbot
   performance/        exercise physiology + biomechanics; role: coach
   product/            PRDs, roadmap, shipping notes
   research/           experiment tracking, reproducibility, paper layout
@@ -57,10 +57,10 @@ examples/             how to add a custom overlay
 
 `catalog.yaml` is the source of truth for harnesses, packages, roles, and adapters.
 
-`dadbot` is registered on every harness and left off every default role. It ships a persona only (no `AGENTS.md`), so it does not replace the harness mission file.
+Entertainment is its own harness. Dadbot is the default role:
 
 ```bash
-symkit install /path/to/repo --harness engineering --role engineer --also dadbot
+symkit init /path/to/bits --harness entertainment --role dadbot
 ```
 
 ## Commands
