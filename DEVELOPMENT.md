@@ -195,37 +195,33 @@ and extend the smoke script when the behavior is user-visible.
 
 ## Branch model
 
-Same family path as SymWorx / SymSight:
+GitHub Flow, same family as SymWorx / SymSight. Default branch is **`worx`**.
 
 ```
-feature/* ──► develop ──► stage ──► release/vX.Y.Z ──► main ──► tag vX.Y.Z
-                 │           │              │             │
-              day-to-day   FF only     release prep    publish
-                 CI        (no CI)     + validation    on tag
+feature/*  ──PR──►  worx  ──tag──►  vX.Y.Z
+                 day-to-day CI         publish on tag
 ```
 
 | Branch | Role |
 |:-------|:-----|
-| `develop` | Day-to-day integration (open PRs here) |
-| `stage` | Fast-forward promotion of a green `develop` SHA (no day-to-day CI) |
-| `release/vX.Y.Z` | Release prep; version + CHANGELOG must match |
-| `main` | Stable; tag `vX.Y.Z` here after merge |
+| `worx` | Default. Open PRs here. Keep it releasable. |
+| `release/vX.Y.Z` | Optional freeze; version + CHANGELOG must match |
 
 Suggested names: `feat/…`, `fix/…`, `docs/…`, `harness/…`.
 
-Do not force-push `main`, `develop`, or `stage`.
+Do not force-push `worx`. Until GitHub finishes renaming `develop` → `worx`,
+open PRs against the GitHub default (`develop`).
 
 ## CI
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on **push and
-PRs to `develop` only**, plus **`workflow_dispatch`** (manual re-run; no
-publish). `stage` and `main` skip day-to-day CI (promotions of a SHA that
-already passed).
+PRs to `worx` and `develop`**, plus **`workflow_dispatch`** (manual re-run; no
+publish).
 [`.github/workflows/release.yml`](.github/workflows/release.yml) re-runs
-that gate on PRs into `main`, pushes to `release/**`, and `v*` tags, with
-a `release-meta` job (package version matches `release/vX.Y.Z` / tag;
-`CHANGELOG.md` has a `## [X.Y.Z]` section).
-Push to `main` is not a Release trigger (the PR already ran it).
+that gate on PRs into `main` (legacy freeze PRs), pushes to `release/**`, and
+`v*` tags, with a `release-meta` job (package version matches `release/vX.Y.Z`
+/ tag; `CHANGELOG.md` has a `## [X.Y.Z]` section).
+Push to `worx` is not a Release trigger (day-to-day CI already ran).
 `workflow_dispatch` re-runs validation only. Platform binaries, GitHub
 Release (archives + `SHA256SUMS`), and crates.io publish are gated on
 `refs/tags/v*` after `release-ready`. Tag builds also write GitHub
@@ -239,13 +235,12 @@ cloning this repo and running `./cli/symkit`.
 
 When a slice is ready:
 
-1. Merge to `develop` with CI green.
-2. Fast-forward `develop` → `stage` when you want a promotion point.
-3. On `release/vX.Y.Z` (from `stage`, or `develop` if stage lags):
+1. Merge to `worx` with CI green.
+2. On `worx` (or an optional `release/vX.Y.Z` freeze branch):
    `./scripts/bump-version.sh patch --changelog`
-4. Open a PR from `release/vX.Y.Z` into `main`. Merge when Release
-   `release-ready` is green.
-5. Tag `vX.Y.Z` on that commit (tag must match `[package] version` in
+3. Open a PR into `worx` if the bump is not already on the default branch.
+   Merge when checks are green.
+4. Tag `vX.Y.Z` on that commit (tag must match `[package] version` in
    `Cargo.toml`). Push the tag. The release workflow runs validation
    again, builds platform archives, opens the GitHub Release (archives +
    `SHA256SUMS` + attestations), and publishes `symkit` to crates.io.

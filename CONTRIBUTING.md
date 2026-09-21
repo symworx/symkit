@@ -51,22 +51,26 @@ need to wait for an issue to be assigned.
 
 1. **Fork** the repository (or use a branch if you have write access) and clone.
 2. Set up the development environment (see [DEVELOPMENT.md](DEVELOPMENT.md)).
-3. Create a focused branch from **`develop`**
+3. Create a focused branch from **`worx`**
    (`git checkout -b feat/your-feature-name`).
 4. Make your changes, ensuring they follow the catalog/harness conventions,
    pass `cargo +nightly fmt -- --check`, `cargo test`,
    `cargo clippy -- -D warnings`, and `./tests/smoke.sh`.
    Install nightly rustfmt via rustup (see [DEVELOPMENT.md](DEVELOPMENT.md)).
 5. Commit with clear, descriptive messages.
-6. Push your branch and open a Pull Request against **`develop`**.
+6. Push your branch and open a Pull Request against **`worx`**.
 
 ## Release path
 
-Do **not** open feature PRs straight to `main`. Releases follow the same
-cycle as SymWorx / SymSight:
+GitHub Flow, same as SymWorx / SymSight. Feature PRs go to **`worx`**. A
+release is a version bump + changelog on `worx`, then a **manual** tag
+`vX.Y.Z`:
 
-`develop` → `stage` (FF) → `release/vX.Y.Z` → PR to `main` → merge → **manual** tag `vX.Y.Z`
+```text
+feature/*  ──PR──►  worx  ──tag──►  vX.Y.Z
+```
 
+Until GitHub renames the default branch, PRs still target **`develop`**.
 Details: [DEVELOPMENT.md](DEVELOPMENT.md#branch-model).
 
 ## Submitting pull requests
