@@ -195,7 +195,7 @@ and extend the smoke script when the behavior is user-visible.
 
 ## Branch model
 
-GitHub Flow, same family as SymWorx / SymSight. Default branch is **`worx`**.
+**SymWorx org standard** (GitHub Flow). Default branch is **`worx`**.
 
 ```
 feature/*  ──PR──►  worx  ──tag──►  vX.Y.Z

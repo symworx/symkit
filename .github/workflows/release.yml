@@ -1,6 +1,8 @@
-# Release validation + GitHub Release + crates.io (see DEVELOPMENT.md).
+# Release validation + GitHub Release + crates.io.
+# SymWorx org standard (GitHub Flow; default branch worx).
+# See DEVELOPMENT.md for this repository's jobs.
 #
-# GitHub Flow (same family as SymWorx / SymSight):
+# GitHub Flow:
 #   feature/* ──PR──► worx ──tag──► vX.Y.Z
 # Optional freeze: push to release/** then PR back to worx.
 #
