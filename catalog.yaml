@@ -233,12 +233,12 @@ harnesses:
         packages: [shared, coach]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, repro-check]
+           signal-quality, symserve, write-gherkin, repro-check]
       performance-coach:
         packages: [shared, coach]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, repro-check]
+           signal-quality, symserve, write-gherkin, repro-check]
       materials:
         packages: [shared]
         skills: [write-gherkin, repro-check]
