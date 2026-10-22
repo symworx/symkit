@@ -24,12 +24,12 @@
 #   ./scripts/bump-version.sh minor --changelog
 #
 # Safe workflow:
-#   1. On release/vX.Y.Z (or develop before the cut):
+#   1. On worx (or an optional release/vX.Y.Z freeze branch):
 #        ./scripts/bump-version.sh patch --dry-run
 #        ./scripts/bump-version.sh patch --changelog
 #   2. Fill in CHANGELOG.md
-#   3. git diff, commit
-#   4. After merge to main: git tag -a vX.Y.Z && git push origin vX.Y.Z
+#   3. git diff, commit, open PR → worx
+#   4. After merge: git tag -a vX.Y.Z && git push origin vX.Y.Z
 #      (Release workflow publishes crates.io + GitHub Release)
 #
 # See DEVELOPMENT.md § Releasing.
