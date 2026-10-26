@@ -75,6 +75,14 @@ pub fn preview(req: &InstallRequest, docs_root: &str) {
         req.resolved.skills.join(" ")
     };
     println!("Skills:   {skills}");
+    for name in &req.resolved.deprecated_skills {
+        if let Some(alias) = req.catalog.library.skill_aliases.get(name) {
+            println!("Note:     skill '{name}' is deprecated; use '{}'", alias.target);
+        }
+    }
+    if !req.resolved.may_spawn.is_empty() {
+        println!("Spawn:    {}", req.resolved.may_spawn.join(" "));
+    }
     let adapters = if req.adapters.is_empty() {
         "none".to_string()
     } else {
@@ -142,6 +150,8 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     if is_kit_root(&req.target) {
         return Err(Error::RefuseSelfInstall);
     }
+    req.catalog.check_spawn_agents(&req.kit_root)?;
+    req.catalog.check_skill_aliases(&req.kit_root)?;
 
     if let Some(existing) = read_existing_harness(&req.target, &req.catalog) {
         if existing != req.resolved.harness {
@@ -183,6 +193,13 @@ pub fn run(req: &InstallRequest) -> Result<()> {
             &req.resolved.skills,
             prune.skills,
         )?;
+        for name in req.catalog.library.skill_aliases.keys() {
+            if !prune.skills.iter().any(|existing| existing == name) {
+                prune.skills.push(name.clone());
+            }
+        }
+        prune.skills.sort();
+        prune.skills.dedup();
         prune_for_resolve(&req.target, &prune)?;
     }
 

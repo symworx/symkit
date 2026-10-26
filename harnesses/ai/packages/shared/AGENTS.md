@@ -38,4 +38,4 @@ Config is the source of truth for what was run.
 ## Related
 
 - `config-as-source.md`, `provenance.md`
-- Skills: `config-check`, `eval-run`, `repro-check`
+- Skills: `config-check`, `eval-run`, `reproducibility-check` (`repro-check` is a deprecated alias)

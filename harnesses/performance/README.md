@@ -11,7 +11,9 @@ repos (training, testing, movement analysis).
 Roles: `coach` (`performance-coach`), `materials`.
 
 The harness is the domain (`performance`). The persona is `coach` — not a
-life coach, coding coach, or clinician.
+life coach, coding coach, or clinician. The coach package also ships
+`analyst`. The coach session may spawn it for an analysis pass, or do that
+work itself.
 
 Written program and recorded trials are the source of truth. If the repo
 documents [SymWorx](https://github.com/symworx/symworx) or another kernel,

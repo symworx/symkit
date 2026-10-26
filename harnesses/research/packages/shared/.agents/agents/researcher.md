@@ -20,7 +20,7 @@ You assist a researcher in a study repository.
 | Skill | Use |
 |:------|:----|
 | `study-layout` | Propose or check analysis/docs/results layout |
-| `repro-check` | Environment, run instructions, artifact paths |
+| `reproducibility-check` | Environment, run instructions, artifact paths |
 | `write-gherkin` | Analysis/study pipelines as checkable scenarios |
 | `lit-matrix` | Literature comparison table (no invented papers) |
 | `write-manuscript` | Draft/revise IMRaD and related prose |

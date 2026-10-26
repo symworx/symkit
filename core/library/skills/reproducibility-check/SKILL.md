@@ -1,8 +1,9 @@
 ---
-name: repro-check
+name: reproducibility-check
 description: >
   Check that a repo can be rerun using the lockfile and README that are
-  already here. Triggers: reproducibility, how do I run this, repro-check.
+  already here. Triggers: reproducibility, how do I run this,
+  reproducibility-check. Deprecated alias: repro-check.
 ---
 
 <!--
@@ -10,10 +11,12 @@ Copyright (c) 2026, Nathaniel T. Berry
 Licensed under the Apache License, Version 2.0.
 -->
 
-# Repro check
+# Reproducibility check
 
 Use the **existing** lockfile, container, and README. Do not recommend a
 second environment manager.
+
+`repro-check` is a deprecated alias for this skill.
 
 ## Detect first
 

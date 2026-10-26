@@ -34,6 +34,10 @@ canonical:
 
 library:
   skills: core/library/skills
+  skill_aliases:
+    repro-check:
+      target: reproducibility-check
+      deprecated: true
 
 core:
   rules: core/rules
@@ -128,11 +132,11 @@ harnesses:
       researcher:
         packages: [shared]
         skills:
-          [write-gherkin, study-layout, repro-check, write-manuscript,
+          [write-gherkin, study-layout, reproducibility-check, write-manuscript,
            write-abstract, review-manuscript, lit-matrix, response-to-reviewers]
       materials:
         packages: [shared]
-        skills: [write-gherkin, study-layout, repro-check]
+        skills: [write-gherkin, study-layout, reproducibility-check]
     prune: {}
 
   ai:
@@ -148,7 +152,7 @@ harnesses:
     roles:
       experimenter:
         packages: [shared]
-        skills: [config-check, eval-run, repro-check]
+        skills: [config-check, eval-run, reproducibility-check]
       materials:
         packages: [shared]
         skills: [config-check]
@@ -225,26 +229,28 @@ harnesses:
         path: harnesses/performance/packages/shared
         student_safe: true
       coach:
-        description: Coach agent (physiology + biomechanics)
+        description: Coach agent plus analyst specialist
         path: harnesses/performance/packages/coach
         student_safe: true
     roles:
       coach:
         packages: [shared, coach]
+        may_spawn: [analyst]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, repro-check]
+           signal-quality, write-gherkin, reproducibility-check]
       performance-coach:
         packages: [shared, coach]
+        may_spawn: [analyst]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, repro-check]
+           signal-quality, write-gherkin, reproducibility-check]
       materials:
         packages: [shared]
-        skills: [write-gherkin, repro-check]
+        skills: [write-gherkin, reproducibility-check]
     prune:
       materials:
-        agents: [coach]
+        agents: [coach, analyst]
 
   engineering:
     status: active
@@ -263,13 +269,13 @@ harnesses:
     roles:
       engineer:
         packages: [shared, engineer]
-        skills: [write-tests, write-docs, write-gherkin, repro-check]
+        skills: [write-tests, write-docs, write-gherkin, reproducibility-check]
       swe:
         packages: [shared, engineer]
-        skills: [write-tests, write-docs, write-gherkin, repro-check]
+        skills: [write-tests, write-docs, write-gherkin, reproducibility-check]
       materials:
         packages: [shared]
-        skills: [write-gherkin, repro-check]
+        skills: [write-gherkin, reproducibility-check]
     prune:
       materials:
         agents: [engineer]

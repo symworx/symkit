@@ -45,6 +45,32 @@ pub enum Error {
     PackagePathMissing(PathBuf),
     #[error("unknown library skill '{name}' (looked in {path})")]
     UnknownSkill { name: String, path: PathBuf },
+    #[error("skill alias '{name}' is invalid: {reason}")]
+    InvalidSkillAlias { name: String, reason: String },
+    #[error("role '{role}' on {harness} has invalid may_spawn name '{name}'")]
+    InvalidSpawnAgent {
+        harness: String,
+        role: String,
+        name: String,
+    },
+    #[error("role '{role}' on {harness} may_spawn '{name}' but no selected package ships .agents/agents/{name}.md")]
+    UnknownSpawnAgent {
+        harness: String,
+        role: String,
+        name: String,
+    },
+    #[error("role '{role}' on {harness} does not install '{name}'; list it in that role's prune.agents")]
+    SpawnAgentNotPruned {
+        harness: String,
+        role: String,
+        name: String,
+    },
+    #[error("role '{role}' on {harness} prunes '{name}', which it may_spawn")]
+    SpawnAgentPrunedByOwner {
+        harness: String,
+        role: String,
+        name: String,
+    },
     #[error("unknown adapter '{0}' (grok|claude|codex|all|none)")]
     UnknownAdapter(String),
     #[error("missing target directory")]

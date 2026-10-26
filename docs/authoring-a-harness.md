@@ -46,12 +46,24 @@ The installer is Rust (`src/`); you do not register packs in code.
 Skill **bodies** live in `core/library/skills/<name>/SKILL.md`. Who receives
 them is `catalog.yaml`: `core.always_skills` (every install) plus each
 role’s `skills:` list. Do not copy a skill into more than one package.
+A second name for one body is `library.skill_aliases`. `repro-check` points
+at `reproducibility-check` and is deprecated. List the target on roles. The
+installer accepts the old name, warns, installs the target directory, and
+prunes a directory left under the alias name.
 
 A role package may ship extra `.agents/agents/*.md` specialists (copywriter
 under creative-director, for example). The role agent is the session;
 specialists are optional children, not a required pipeline. Do not add a
 nested supervisor — vendor tools only let the root session spawn. Keep
 spawn notes short so the session can still do the work itself.
+
+When a role may spawn a specialist, set `may_spawn: [analyst]` on that role
+(performance `coach` does this). Each name is the agent filename without
+`.md`, and the file lives in a package that role installs. Every other role
+that does not install that package lists the name in `prune.agents`. The
+installer refuses a missing file, a role that would leave the file behind,
+and a role that both spawns and prunes the same name. `--pack` does not
+apply `may_spawn`.
 
 ## Overlays vs new harnesses
 

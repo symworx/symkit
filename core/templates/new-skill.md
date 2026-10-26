@@ -17,7 +17,8 @@ On-demand procedure. Put the body in:
 `core/library/skills/<skill-name>/SKILL.md`
 
 Then list the name under `core.always_skills` (every install) or a role’s
-`skills:` list in `catalog.yaml`.
+`skills:` list in `catalog.yaml`. A second name belongs in
+`library.skill_aliases`, not a second copy of this body.
 
 ## Steps
 

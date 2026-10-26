@@ -60,7 +60,7 @@ HOW TO GET THE BINARY
 
 PRIMARY FLOW
   symkit list                         # harnesses and default roles
-  symkit show <harness>               # packs, roles, skills
+  symkit show <harness>               # packs, roles, skills, may_spawn, skill aliases
   symkit init <dir> --harness … --role … [--scaffold]
   symkit install <dir> --harness … --role …
 

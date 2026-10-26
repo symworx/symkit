@@ -89,14 +89,18 @@ tests/smoke.sh        installer behavior
 ## How an install works
 
 1. `cli/symkit` execs the Rust binary; clap parses flags; `catalog.rs` resolves
-   harness + role + packs.
+   harness + role + packs. `may_spawn` names must be agent files in the role's
+   packages. Any other role that does not install that package lists the name
+   in `prune.agents`. `--pack` does not apply `may_spawn`.
 2. Optional workspace scaffold (`init --scaffold`) copies files without
    overwriting unless `--force`.
 3. Catalog `prune` lists remove leftover role paths (skills / agents / rules
    under `.agents/` and vendor mirrors).
 4. `core/rules/` merges into the target `.agents/rules/`.
 5. Library skills listed on the role (plus `core.always_skills`) copy into
-   `.agents/skills/<name>/`. Other library skills are pruned.
+   `.agents/skills/<name>/`. A `library.skill_aliases` entry resolves to that
+   skill's directory. A deprecated alias is accepted, and its old directory
+   name is pruned. Other library skills are pruned.
 6. Each resolved package copies pack `AGENTS.md` to `AGENTS-SYMKIT.md`
    (last pack wins) and merges `.agents/` (rules/agents; leftover package
    skills if any) and `docs/`. After packs, a pointer block is appended to
@@ -118,7 +122,7 @@ enforced access control.
 1. Add or edit packages under `harnesses/<name>/packages/`.
 2. Add or reuse skill bodies under `core/library/skills/`.
 3. Optional workspace under `harnesses/<name>/workspace/`.
-4. Register `status`, `packages`, role `packages:` / `skills:`, `prune`,
+4. Register `status`, `packages`, role `packages:` / `skills:` / `may_spawn:`, `prune`,
    `workspace`, and optional `templates:` in `catalog.yaml`.
 5. Check:
 

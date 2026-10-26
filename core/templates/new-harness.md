@@ -9,8 +9,10 @@
 4. Optional workspace scaffold: `harnesses/<name>/workspace/`.
 5. Optional `--docs` blanks: `harnesses/<name>/templates/` plus a
    `templates:` map in `catalog.yaml`.
-6. Register the harness, packages, role `packages:` / `skills:`, and prune
-   lists (agents/rules) in `catalog.yaml`.
+6. Register the harness, packages, role `packages:` / `skills:` /
+   `may_spawn:`, and prune lists (agents/rules) in `catalog.yaml`. A
+   `may_spawn` name is an agent stem in a package that role installs;
+   other roles prune it.
 7. Check with:
 
 ```bash

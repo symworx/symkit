@@ -105,6 +105,16 @@ impl Canonical {
 pub struct Library {
     #[serde(default)]
     pub skills: String,
+    /// Old skill name → canonical skill. One body on disk.
+    #[serde(default)]
+    pub skill_aliases: BTreeMap<String, SkillAlias>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct SkillAlias {
+    pub target: String,
+    #[serde(default)]
+    pub deprecated: bool,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -128,6 +138,9 @@ pub struct RoleAssign {
     pub packages: Vec<String>,
     #[serde(default)]
     pub skills: Vec<String>,
+    /// Agent filename stems this role's session may spawn. Leaves stay empty.
+    #[serde(default)]
+    pub may_spawn: Vec<String>,
 }
 
 impl RoleSpec {
@@ -142,6 +155,13 @@ impl RoleSpec {
         match self {
             RoleSpec::Packages(_) => &[],
             RoleSpec::Assign(a) => &a.skills,
+        }
+    }
+
+    pub fn may_spawn(&self) -> &[String] {
+        match self {
+            RoleSpec::Packages(_) => &[],
+            RoleSpec::Assign(a) => &a.may_spawn,
         }
     }
 }
@@ -218,6 +238,9 @@ pub struct Resolve {
     pub role: String,
     pub packages: Vec<String>,
     pub skills: Vec<String>,
+    pub may_spawn: Vec<String>,
+    /// Alias names requested by this role. Install still uses `skills`.
+    pub deprecated_skills: Vec<String>,
     pub private: Vec<String>,
     pub student_safe: Vec<String>,
     pub workspace: String,
@@ -249,7 +272,7 @@ impl Catalog {
             return Err(Error::NotInstallable(harness.to_string(), h.status.clone()));
         }
 
-        let (used_role, selected, role_skills) = if extra_packs.is_empty() {
+        let (used_role, selected, role_skills, may_spawn) = if extra_packs.is_empty() {
             let used = role
                 .filter(|r| !r.is_empty())
                 .map(str::to_string)
@@ -267,9 +290,19 @@ impl Catalog {
                 harness: harness.to_string(),
                 known: join_keys(&h.roles),
             })?;
-            (used, spec.packages().to_vec(), spec.skills().to_vec())
+            (
+                used,
+                spec.packages().to_vec(),
+                spec.skills().to_vec(),
+                spec.may_spawn().to_vec(),
+            )
         } else {
-            (role.unwrap_or("").to_string(), extra_packs.to_vec(), Vec::new())
+            (
+                role.unwrap_or("").to_string(),
+                extra_packs.to_vec(),
+                Vec::new(),
+                Vec::new(),
+            )
         };
 
         let unknown: Vec<_> = selected
@@ -295,13 +328,22 @@ impl Catalog {
             .cloned()
             .collect();
         let prune = h.prune.get(&used_role).cloned().unwrap_or_default();
-        let skills = merge_skill_names(&self.core.always_skills, &role_skills);
+        let (role_skills, mut deprecated_skills) = self.canonicalize_skills(&role_skills);
+        let (always_skills, always_deprecated) = self.canonicalize_skills(&self.core.always_skills);
+        for name in always_deprecated {
+            if !deprecated_skills.iter().any(|existing| existing == &name) {
+                deprecated_skills.push(name);
+            }
+        }
+        let skills = merge_skill_names(&always_skills, &role_skills);
 
         Ok(Resolve {
             harness: harness.to_string(),
             role: used_role,
             packages: selected,
             skills,
+            may_spawn,
+            deprecated_skills,
             private,
             student_safe,
             workspace: h.workspace.clone(),
@@ -364,6 +406,11 @@ impl Catalog {
             &["HARNESS", "STATUS", "DEFAULT_ROLE", "DESCRIPTION"],
             &rows,
         ));
+        let aliases = self.format_skill_aliases();
+        if !aliases.is_empty() {
+            out.push('\n');
+            out.push_str(&aliases);
+        }
         out
     }
 
@@ -386,19 +433,171 @@ impl Catalog {
             let safe = if meta.student_safe { "yes" } else { "no" };
             out.push_str(&format!("{pkg}\t{safe}\t{}\t{}\n", meta.path, meta.description));
         }
-        out.push_str("ROLE\tPACKAGES\tSKILLS\n");
+        out.push_str("ROLE\tPACKAGES\tSKILLS\tMAY_SPAWN\n");
         for (role, spec) in &h.roles {
+            let skills = spec
+                .skills()
+                .iter()
+                .map(|name| self.canonical_skill(name))
+                .collect::<Vec<_>>()
+                .join(" ");
             out.push_str(&format!(
-                "{role}\t{}\t{}\n",
+                "{role}\t{}\t{skills}\t{}\n",
                 spec.packages().join(" "),
-                spec.skills().join(" ")
+                spec.may_spawn().join(" ")
             ));
+        }
+        let aliases = self.format_skill_aliases();
+        if !aliases.is_empty() {
+            out.push('\n');
+            out.push_str(&aliases);
         }
         Ok(out)
     }
 
+    pub fn canonical_skill<'a>(&'a self, name: &'a str) -> &'a str {
+        self.library
+            .skill_aliases
+            .get(name)
+            .map(|alias| alias.target.as_str())
+            .unwrap_or(name)
+    }
+
+    fn canonicalize_skills(&self, names: &[String]) -> (Vec<String>, Vec<String>) {
+        let mut out = Vec::new();
+        let mut deprecated = Vec::new();
+        for name in names {
+            let canonical = self.canonical_skill(name);
+            if let Some(alias) = self.library.skill_aliases.get(name) {
+                if alias.deprecated && !deprecated.iter().any(|existing| existing == name) {
+                    deprecated.push(name.clone());
+                }
+            }
+            if !canonical.is_empty() && !out.iter().any(|existing| existing == canonical) {
+                out.push(canonical.to_string());
+            }
+        }
+        (out, deprecated)
+    }
+
+    fn format_skill_aliases(&self) -> String {
+        if self.library.skill_aliases.is_empty() {
+            return String::new();
+        }
+        let rows: Vec<Vec<String>> = self
+            .library
+            .skill_aliases
+            .iter()
+            .map(|(name, alias)| {
+                vec![
+                    name.clone(),
+                    alias.target.clone(),
+                    if alias.deprecated { "yes" } else { "no" }.to_string(),
+                ]
+            })
+            .collect();
+        aligned_table(&["SKILL_ALIAS", "TARGET", "DEPRECATED"], &rows)
+    }
+
+    /// Alias targets are real skill directories. Alias names are not.
+    pub fn check_skill_aliases(&self, kit: &Path) -> Result<()> {
+        for (name, alias) in &self.library.skill_aliases {
+            if !valid_agent_stem(name) {
+                return Err(Error::InvalidSkillAlias {
+                    name: name.clone(),
+                    reason: "name must be a bare skill stem".into(),
+                });
+            }
+            if !valid_agent_stem(&alias.target) || self.library.skill_aliases.contains_key(&alias.target) {
+                return Err(Error::InvalidSkillAlias {
+                    name: name.clone(),
+                    reason: format!("target '{}' must be a skill directory, not another alias", alias.target),
+                });
+            }
+            let target = kit.join(self.skill_path(&alias.target));
+            if !target.is_dir() {
+                return Err(Error::UnknownSkill {
+                    name: alias.target.clone(),
+                    path: target,
+                });
+            }
+            let alias_dir = kit.join(&self.library.skills).join(name);
+            if alias_dir.is_dir() {
+                return Err(Error::InvalidSkillAlias {
+                    name: name.clone(),
+                    reason: format!("alias name is also a skill directory ({})", alias_dir.display()),
+                });
+            }
+        }
+        Ok(())
+    }
+
+    /// Each `may_spawn` name is an agent file in a package that role installs.
+    /// Any other role that does not install such a package must prune the name.
+    pub fn check_spawn_agents(&self, kit: &Path) -> Result<()> {
+        for (harness_name, harness) in &self.harnesses {
+            for (role, spec) in &harness.roles {
+                let spawn = spec.may_spawn();
+                if spawn.is_empty() {
+                    continue;
+                }
+                let mut seen = Vec::new();
+                for name in spawn {
+                    if !valid_agent_stem(name) || seen.iter().any(|s| s == name) {
+                        return Err(Error::InvalidSpawnAgent {
+                            harness: harness_name.clone(),
+                            role: role.clone(),
+                            name: name.clone(),
+                        });
+                    }
+                    seen.push(name.clone());
+                    let shippers = packages_shipping_agent(kit, harness, name);
+                    if !spec.packages().iter().any(|pkg| shippers.iter().any(|s| s == pkg)) {
+                        return Err(Error::UnknownSpawnAgent {
+                            harness: harness_name.clone(),
+                            role: role.clone(),
+                            name: name.clone(),
+                        });
+                    }
+                    if harness
+                        .prune
+                        .get(role)
+                        .is_some_and(|prune| prune.agents.iter().any(|agent| agent == name))
+                    {
+                        return Err(Error::SpawnAgentPrunedByOwner {
+                            harness: harness_name.clone(),
+                            role: role.clone(),
+                            name: name.clone(),
+                        });
+                    }
+                    for (other, other_spec) in &harness.roles {
+                        if other == role {
+                            continue;
+                        }
+                        let installs = other_spec
+                            .packages()
+                            .iter()
+                            .any(|pkg| shippers.iter().any(|s| s == pkg));
+                        let prunes = harness
+                            .prune
+                            .get(other)
+                            .is_some_and(|prune| prune.agents.iter().any(|agent| agent == name));
+                        if !installs && !prunes {
+                            return Err(Error::SpawnAgentNotPruned {
+                                harness: harness_name.clone(),
+                                role: other.clone(),
+                                name: name.clone(),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn skill_path(&self, name: &str) -> PathBuf {
-        PathBuf::from(&self.library.skills).join(name)
+        PathBuf::from(&self.library.skills).join(self.canonical_skill(name))
     }
 
     pub fn doc_template(&self, harness: &str, id: &str) -> Result<&DocTemplate> {
@@ -463,6 +662,25 @@ fn pad_cells<'a>(cells: impl IntoIterator<Item = &'a str>, widths: &[usize]) -> 
         .collect()
 }
 
+fn valid_agent_stem(name: &str) -> bool {
+    !name.is_empty() && name != "." && name != ".." && !name.contains(['/', '\\', '.'])
+}
+
+fn packages_shipping_agent(kit: &Path, harness: &Harness, name: &str) -> Vec<String> {
+    harness
+        .packages
+        .iter()
+        .filter(|(_, meta)| {
+            kit.join(&meta.path)
+                .join(".agents")
+                .join("agents")
+                .join(format!("{name}.md"))
+                .is_file()
+        })
+        .map(|(pkg, _)| pkg.clone())
+        .collect()
+}
+
 fn join_keys<V>(map: &BTreeMap<String, V>) -> String {
     if map.is_empty() {
         "(none)".into()
@@ -502,7 +720,75 @@ mod tests {
         assert_eq!(r.packages, ["shared"]);
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"write-manuscript".into()));
+        assert!(r.skills.contains(&"reproducibility-check".into()));
+        assert!(!r.skills.iter().any(|skill| skill == "repro-check"));
+        assert!(r.deprecated_skills.is_empty());
         assert!(!r.skills.contains(&"course-prep".into()));
+    }
+
+    #[test]
+    fn repro_check_alias_installs_canonical_skill() {
+        let cat = load_repo();
+        assert!(
+            cat.skill_path("repro-check")
+                .ends_with("core/library/skills/reproducibility-check")
+        );
+        cat.check_skill_aliases(Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+        let listed = cat.format_list();
+        assert!(listed.contains("SKILL_ALIAS"));
+        assert!(listed.contains("repro-check"));
+        assert!(listed.contains("reproducibility-check"));
+
+        let yaml = r#"
+version: 1
+library:
+  skills: skills
+  skill_aliases:
+    repro-check:
+      target: reproducibility-check
+      deprecated: true
+harnesses:
+  demo:
+    status: active
+    default_role: lead
+    packages:
+      shared:
+        path: pkg
+        student_safe: true
+    roles:
+      lead:
+        packages: [shared]
+        skills: [repro-check, reproducibility-check]
+"#;
+        let cat: Catalog = serde_yaml::from_str(yaml).unwrap();
+        let resolved = cat.resolve("demo", Some("lead"), &[]).unwrap();
+        assert_eq!(resolved.skills, ["reproducibility-check"]);
+        assert_eq!(resolved.deprecated_skills, ["repro-check"]);
+    }
+
+    #[test]
+    fn skill_alias_refuses_missing_target_and_shadow_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let kit = dir.path();
+        let yaml = r#"
+version: 1
+library:
+  skills: skills
+  skill_aliases:
+    repro-check:
+      target: reproducibility-check
+      deprecated: true
+harnesses: {}
+"#;
+        let cat: Catalog = serde_yaml::from_str(yaml).unwrap();
+        let missing = cat.check_skill_aliases(kit).unwrap_err();
+        assert!(missing.to_string().contains("reproducibility-check"), "{missing}");
+
+        fs::create_dir_all(kit.join("skills/reproducibility-check")).unwrap();
+        cat.check_skill_aliases(kit).unwrap();
+        fs::create_dir_all(kit.join("skills/repro-check")).unwrap();
+        let shadow = cat.check_skill_aliases(kit).unwrap_err();
+        assert!(shadow.to_string().contains("repro-check"), "{shadow}");
     }
 
     #[test]
@@ -545,10 +831,90 @@ mod tests {
         let cat = load_repo();
         let r = cat.resolve("performance", Some("coach"), &[]).unwrap();
         assert_eq!(r.packages, ["shared", "coach"]);
+        assert_eq!(r.may_spawn, ["analyst"]);
         assert!(r.skills.contains(&"session-plan".into()));
         assert!(r.skills.contains(&"movement-review".into()));
         assert!(r.skills.contains(&"physio-explain".into()));
         assert!(!r.skills.contains(&"course-prep".into()));
+        let alias = cat.resolve("performance", Some("performance-coach"), &[]).unwrap();
+        assert_eq!(alias.may_spawn, ["analyst"]);
+        let materials = cat.resolve("performance", Some("materials"), &[]).unwrap();
+        assert!(materials.may_spawn.is_empty());
+        assert_eq!(materials.prune.agents, ["coach", "analyst"]);
+        let packs = cat.resolve("performance", None, &["shared".into()]).unwrap();
+        assert!(packs.may_spawn.is_empty());
+    }
+
+    #[test]
+    fn repo_spawn_agents_match_packages_and_prune() {
+        let cat = load_repo();
+        cat.check_spawn_agents(Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+        let shown = cat.format_show("performance").unwrap();
+        assert!(shown.contains("ROLE\tPACKAGES\tSKILLS\tMAY_SPAWN"));
+        assert!(
+            shown
+                .lines()
+                .any(|line| line.starts_with("coach\t") && line.ends_with("\tanalyst"))
+        );
+    }
+
+    #[test]
+    fn spawn_refuses_missing_file_missing_prune_and_owner_prune() {
+        let dir = tempfile::tempdir().unwrap();
+        let kit = dir.path();
+        let agent_dir = kit.join("pkg/lead/.agents/agents");
+        fs::create_dir_all(&agent_dir).unwrap();
+        fs::write(agent_dir.join("helper.md"), "# helper\n").unwrap();
+        fs::create_dir_all(kit.join("pkg/shared")).unwrap();
+
+        let missing_prune = demo_catalog(false, false, "[helper]");
+        let err = missing_prune.check_spawn_agents(kit).unwrap_err();
+        assert!(err.to_string().contains("materials"), "{err}");
+
+        let ok = demo_catalog(false, true, "[helper]");
+        ok.check_spawn_agents(kit).unwrap();
+
+        let missing_file = demo_catalog(false, true, "[nope]");
+        let err = missing_file.check_spawn_agents(kit).unwrap_err();
+        assert!(err.to_string().contains("nope"), "{err}");
+
+        let owner_prunes = demo_catalog(true, true, "[helper]");
+        let err = owner_prunes.check_spawn_agents(kit).unwrap_err();
+        assert!(err.to_string().contains("prunes"), "{err}");
+
+        let bad_name = demo_catalog(false, true, "[helper.md]");
+        let err = bad_name.check_spawn_agents(kit).unwrap_err();
+        assert!(err.to_string().contains("invalid"), "{err}");
+    }
+
+    fn demo_catalog(lead_prunes: bool, materials_prunes: bool, may_spawn: &str) -> Catalog {
+        let lead_prune = if lead_prunes { "{ agents: [helper] }" } else { "{}" };
+        let materials_prune = if materials_prunes { "{ agents: [helper] }" } else { "{}" };
+        let yaml = format!(
+            r#"
+version: 1
+harnesses:
+  demo:
+    status: active
+    packages:
+      lead:
+        path: pkg/lead
+        student_safe: true
+      shared:
+        path: pkg/shared
+        student_safe: true
+    roles:
+      lead:
+        packages: [lead]
+        may_spawn: {may_spawn}
+      materials:
+        packages: [shared]
+    prune:
+      lead: {lead_prune}
+      materials: {materials_prune}
+"#
+        );
+        serde_yaml::from_str(&yaml).unwrap()
     }
 
     #[test]

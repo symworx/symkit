@@ -54,7 +54,7 @@ Typical names when you are starting empty:
 
 - `aims-as-truth.md`
 - `study-layout` — propose or check folder conventions
-- `repro-check` — env lock, how-to-run, artifact paths
+- `reproducibility-check` — env lock, how-to-run, artifact paths (`repro-check` is a deprecated alias)
 - `write-gherkin` — pipeline specs as observables
 - `check-citations` — claim ↔ source integrity; never invent papers or DOIs
 - manuscript suite when assigned: `lit-matrix`, `write-manuscript`,
