@@ -983,9 +983,7 @@ harnesses:
         assert!(r.skills.contains(&"naming".into()));
         assert!(r.skills.contains(&"delegate".into()));
         assert!(!r.skills.iter().any(|s| s == "write-prd"));
-        let director = cat
-            .resolve("creative", Some("creative-director"), &[])
-            .unwrap();
+        let director = cat.resolve("creative", Some("creative-director"), &[]).unwrap();
         assert_eq!(director.may_spawn, ["copywriter", "editor"]);
         assert!(director.skills.contains(&"delegate".into()));
     }
