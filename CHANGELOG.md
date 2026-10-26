@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed 
+
+## [0.3.0] - 2026-10-26
+
+### Added
+
 - Role field `may_spawn`. Performance `coach` (and `performance-coach`) may
   spawn `analyst`. Research `researcher` may spawn `reviewer`. Creative
   `creative-director` (and `creative`) may spawn `copywriter` and `editor`.
