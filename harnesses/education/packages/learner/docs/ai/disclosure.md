@@ -42,4 +42,4 @@ Disclosure does **not** make fabricated results or un-understood code acceptable
 
 ---
 
-*Part of the teaching learner pack. Syllabus / LMS may require a specific format.*
+*Part of the education learner pack. Syllabus / LMS may require a specific format.*

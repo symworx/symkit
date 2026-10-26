@@ -118,7 +118,7 @@ mod tests {
         extract_embedded_kit(dir.path()).unwrap();
         assert!(is_kit_root(dir.path()));
         assert!(dir.path().join("core/rules").is_dir());
-        assert!(dir.path().join("harnesses/teaching").is_dir());
+        assert!(dir.path().join("harnesses/education").is_dir());
         let cat = fs::read_to_string(dir.path().join("catalog.yaml")).unwrap();
         assert!(cat.contains("name: symkit"));
     }

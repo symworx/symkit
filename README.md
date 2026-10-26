@@ -2,7 +2,7 @@
 
 **agentic harnesses** designed for educational purposes but available for all...
 
-Edit content once under `harnesses/`. Install into a teaching, research, experiment, product, creative, performance, or engineering repo so Grok,
+Edit content once under `harnesses/`. Install into an education, research, experiment, product, creative, performance, or engineering repo so Grok,
 Claude Code, Codex, and similar tools share the same
 policies via thin path adapters.
 
@@ -20,15 +20,15 @@ symkit guide
 
 # From a clone of this repo
 ./cli/symkit list
-./cli/symkit show teaching
+./cli/symkit show education
  
-# Teaching course (usual): csymd/symcourse new calls this installer
+# Education course (usual): csymd/symcourse new calls this installer
 #   ./cli/symcourse new bio-101 --course-number "BIO 101" --course-title "…" \
 #     --symkit /path/to/this/checkout
 # Equivalent, on an existing course tree (no --scaffold):
-symkit install /path/to/course --harness teaching --role instructor --docs slos
+symkit install /path/to/course --harness education --role instructor --docs slos
 
-# Kit-only teaching stubs, or any other harness (not a full course image)
+# Kit-only education stubs, or any other harness (not a full course image)
 symkit init /path/to/new-study \
   --harness research --role researcher --scaffold --docs aims
 ```
@@ -50,7 +50,7 @@ harnesses/
   finance/            planning and tax from a written record; roles: advisor, CPA
   product/            PRDs, roadmap, shipping notes
   research/           experiment tracking, reproducibility, paper layout
-  teaching/           course templates, staff/learner agents
+  education/          course templates, staff/learner agents (`teaching` is a deprecated alias)
 cli/symkit            shim → target/debug/symkit
 examples/             how to add a custom overlay
 ```
@@ -73,7 +73,7 @@ Adapters default to **grok**. Harness `AGENTS.md` lands in `AGENTS-SYMKIT.md`
 never replaced. Canonical trees also include `.agents/` (+ `docs/`). Use
 `--adapters all` or `--adapters none`.
 
-## Teaching roles
+## Education roles
 
 | Role | Installs | Student-facing git? |
 |:-----|:---------|:--------------------|
@@ -86,19 +86,20 @@ Do not stack a full faculty tree and a full learner tree unless you pass both
 explicitly (`--pack` / `--also`). Do not install `--role instructor` and then
 `--role learner` on the same tree (learner prune strips instructor agents).
 
-## Teaching courses and symcourse
+## Education courses and symcourse
 
 [symworx/symcourse](https://github.com/symworx/symcourse) owns **course runtime**
 (folders, identity, optional uv/Containerfile). This kit owns **agent packs**.
 
-The common teaching path is `symcourse new`, which runs
-`symkit install … --role instructor --docs slos` (no `--scaffold`). Pass
+The common course path is `symcourse new`, which runs
+`symkit install … --harness education --role instructor --docs slos` (no `--scaffold`). Pass
 `--symkit` to that command if this binary is not on `PATH`.
+`teaching` is a deprecated alias for the `education` harness.
 
 `symkit init --scaffold` is for kit-only folder stubs or other harnesses
 (research, engineering, …). Do not pass `--scaffold` on a `symcourse` tree.
 
-`--migration-docs` (teaching `init` asks on a TTY) creates `migration-docs/`
+`--migration-docs` (education `init` asks on a TTY) creates `migration-docs/`
 for legacy PDF/Word files. Convert with instructor skill `migrate-course`.
 Dumps stay gitignored.
 

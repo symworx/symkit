@@ -43,4 +43,4 @@ Ask the instructor **before** pasting. “I didn’t know” is harder to fix af
 
 ---
 
-*Part of the teaching learner pack.*
+*Part of the education learner pack.*

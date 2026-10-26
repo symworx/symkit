@@ -79,4 +79,4 @@ Ask the instructor or TA early—especially about data and disclosure—before a
 
 ---
 
-*Canonical student kit: the teaching **learner** pack in this repo.*
+*Canonical student kit: the education **learner** pack in this repo.*

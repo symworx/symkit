@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   take the place of a licensed financial advisor or a certified public
   accountant. `materials` prunes the personas and both leaves.
 
-### Changed 
+### Changed
+
+- Harness `teaching` is now `education`. `teaching` remains a deprecated
+  alias: `list` and `show` accept it, install warns, and `.symkit/state.yaml`
+  records `education`. The tree is `harnesses/education/`.
 
 ## [0.3.0] - 2026-10-26
 

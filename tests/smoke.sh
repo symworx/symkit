@@ -16,9 +16,13 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 pass() { echo "ok  $*"; }
 
 "$CLI" list | grep -q '^HARNESS' || fail "list header"
-"$CLI" list | grep -q teaching || fail "list teaching"
-"$CLI" show teaching | grep -q '^instructor	' || fail "show teaching roles"
-"$CLI" show teaching | grep -q $'instructor\t.*\tmaterials-author$' || fail "show may_spawn materials-author"
+"$CLI" list | grep -q education || fail "list education"
+"$CLI" list | grep -q teaching || fail "list teaching alias"
+"$CLI" show education | grep -q '^HARNESS=education$' || fail "show education id"
+"$CLI" show teaching | grep -q '^HARNESS=education$' || fail "teaching alias resolves"
+"$CLI" show teaching | grep -q 'deprecated' || fail "teaching alias note"
+"$CLI" show education | grep -q '^instructor	' || fail "show education roles"
+"$CLI" show education | grep -q $'instructor\t.*\tmaterials-author$' || fail "show may_spawn materials-author"
 "$CLI" show creative | grep -q $'creative-director\t.*\tcopywriter editor$' || fail "show may_spawn copywriter editor"
 "$CLI" show performance | grep -q '^STATUS=active' || fail "performance active"
 "$CLI" --help | grep -q '^FLOW' || fail "help FLOW"
@@ -28,14 +32,16 @@ pass() { echo "ok  $*"; }
 "$CLI" guide | grep -q 'symworx/symkit/releases' || fail "guide releases URL"
 "$CLI" init --help | grep -q 'Target directory' || fail "init flag help"
 "$CLI" init --help | grep -q -- '--docs' || fail "init --docs flag"
-"$CLI" show teaching | grep -q '^slos	' || fail "show teaching slos template"
+"$CLI" show education | grep -q '^slos	' || fail "show education slos template"
 "$CLI" show research | grep -q '^aims	' || fail "show research aims template"
 "$CLI" show research | grep -q '^protocol	' || fail "show research protocol template"
 
 # materials then instructor
 T1="$WORKDIR/course"
 mkdir -p "$T1"
-"$CLI" install "$T1" --harness teaching --role materials --yes
+note=$("$CLI" install "$T1" --harness teaching --role materials --yes)
+printf '%s\n' "$note" | grep -q "harness 'teaching' is deprecated; use 'education'" || fail "teaching alias note"
+grep -q '^harness: education$' "$T1/.symkit/state.yaml" || fail "state records education"
 [[ -f "$T1/AGENTS.md" ]] || fail "materials AGENTS.md"
 [[ -f "$T1/AGENTS-SYMKIT.md" ]] || fail "materials AGENTS-SYMKIT.md"
 grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md pointer"
@@ -46,7 +52,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 [[ -d "$T1/.agents/skills/course-prep" ]] && fail "course-prep should be absent on materials"
 [[ -d "$T1/.agents/skills/evaluate-content" ]] && fail "evaluate-content should be absent on materials"
 
-"$CLI" install "$T1" --harness teaching --role instructor --yes
+"$CLI" install "$T1" --harness education --role instructor --yes
 [[ -f "$T1/.agents/agents/instructor.md" ]] || fail "instructor agent"
 [[ -d "$T1/.agents/skills/course-prep" ]] || fail "course-prep after instructor"
 [[ -f "$T1/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on instructor"
@@ -57,7 +63,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 [[ -f "$T1/.symkit/state.yaml" ]] || fail "install state"
 
 # TA prunes instructor-only
-"$CLI" install "$T1" --harness teaching --role ta --yes
+"$CLI" install "$T1" --harness education --role ta --yes
 [[ -d "$T1/.agents/skills/course-prep" ]] && fail "course-prep should be pruned on ta"
 [[ -d "$T1/.agents/skills/delegate" ]] && fail "delegate should be pruned on ta"
 [[ -d "$T1/.agents/skills/migrate-course" ]] && fail "migrate-course should be pruned on ta"
@@ -71,7 +77,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 # learner does not drop staff leftovers if we start clean
 T2="$WORKDIR/learner"
 mkdir -p "$T2"
-"$CLI" install "$T2" --harness teaching --role learner --yes --adapters none
+"$CLI" install "$T2" --harness education --role learner --yes --adapters none
 [[ -f "$T2/docs/ai-what-to-expect.md" ]] || fail "learner docs"
 [[ -f "$T2/.agents/agents/learner.md" ]] || fail "learner agent"
 [[ -d "$T2/.agents/skills/delegate" ]] && fail "delegate must not install on learner"
@@ -80,10 +86,10 @@ mkdir -p "$T2"
 T_AI="$WORKDIR/keep-ai"
 mkdir -p "$T_AI/docs"
 printf 'course-owned-ai-policy\n' > "$T_AI/docs/ai-what-to-expect.md"
-"$CLI" install "$T_AI" --harness teaching --role learner --yes --adapters none
+"$CLI" install "$T_AI" --harness education --role learner --yes --adapters none
 grep -q course-owned-ai-policy "$T_AI/docs/ai-what-to-expect.md" || fail "pack docs must not clobber existing"
 [[ -f "$T_AI/docs/ai/workflow.md" ]] || fail "learner docs/ai still merge when missing"
-"$CLI" install "$T_AI" --harness teaching --role learner --yes --adapters none --force
+"$CLI" install "$T_AI" --harness education --role learner --yes --adapters none --force
 grep -q course-owned-ai-policy "$T_AI/docs/ai-what-to-expect.md" && fail "pack docs --force should replace"
 [[ -d "$T2/.agents/skills/evaluate-content" ]] && fail "staff skills must not install on learner"
 [[ -d "$T2/.agents/skills/write-gherkin" ]] && fail "write-gherkin must not install on learner"
@@ -92,18 +98,18 @@ grep -q course-owned-ai-policy "$T_AI/docs/ai-what-to-expect.md" && fail "pack d
 
 # init scaffold, no clobber
 T3="$WORKDIR/newcourse"
-"$CLI" init "$T3" --harness teaching --role materials --scaffold --yes
+"$CLI" init "$T3" --harness education --role materials --scaffold --yes
 [[ -f "$T3/assignments/README.md" ]] || fail "scaffold assignments"
 [[ -f "$T3/README.md" ]] || fail "scaffold README"
 [[ -f "$T3/docs/ai-what-to-expect.md" ]] || fail "scaffold AI policy stub"
 [[ -d "$T3/migration-docs" ]] && fail "scaffold --yes must not create migration-docs without --migration-docs"
 echo 'keep-me' > "$T3/README.md"
-"$CLI" init "$T3" --harness teaching --role materials --scaffold --yes
+"$CLI" init "$T3" --harness education --role materials --scaffold --yes
 grep -q keep-me "$T3/README.md" || fail "scaffold must not clobber README without --force"
 [[ -f "$T3/docs/slos.md" ]] && fail "scaffold must not copy slos.md without --docs"
 
 T_MIG="$WORKDIR/migrate-course"
-"$CLI" init "$T_MIG" --harness teaching --role instructor --scaffold --migration-docs --yes
+"$CLI" init "$T_MIG" --harness education --role instructor --scaffold --migration-docs --yes
 [[ -f "$T_MIG/migration-docs/README.md" ]] || fail "migration-docs README"
 grep -q 'BEGIN symkit migration-docs' "$T_MIG/.gitignore" || fail "migration-docs gitignore"
 grep -q 'migration-docs/\*\*' "$T_MIG/.gitignore" || fail "migration-docs glob"
@@ -233,7 +239,7 @@ grep -q 'do not take the place of a professional financial advisor' "$TF/.agents
 [[ -d "$TF/.agents/skills/delegate" ]] && fail "delegate should be pruned on finance materials"
 
 # refuse kit root
-if "$CLI" install "$ROOT" --harness teaching --role materials --yes 2>"$WORKDIR/err2"; then
+if "$CLI" install "$ROOT" --harness education --role materials --yes 2>"$WORKDIR/err2"; then
   fail "should refuse kit root"
 fi
 grep -q 'refusing' "$WORKDIR/err2" || fail "kit-root error message"
@@ -245,7 +251,7 @@ grep -q '.symkit/' "$T1/.gitignore" || fail "gitignore state"
 # adapters all
 T6="$WORKDIR/alladapt"
 mkdir -p "$T6"
-"$CLI" install "$T6" --harness teaching --role materials --adapters all --yes
+"$CLI" install "$T6" --harness education --role materials --adapters all --yes
 [[ -f "$T6/CLAUDE.md" ]] || fail "CLAUDE.md pointer"
 grep -q '@AGENTS-SYMKIT.md' "$T6/CLAUDE.md" || fail "CLAUDE.md includes overlay"
 grep -q '@AGENTS.md' "$T6/CLAUDE.md" || fail "CLAUDE.md includes AGENTS.md"
@@ -266,28 +272,28 @@ n="$(grep -c 'BEGIN symkit harness' "$T_KEEP/AGENTS.md")"
 
 # --docs templates
 T_SLO="$WORKDIR/slo-course"
-"$CLI" init "$T_SLO" --harness teaching --role materials --scaffold --docs slos --yes
+"$CLI" init "$T_SLO" --harness education --role materials --scaffold --docs slos --yes
 [[ -f "$T_SLO/docs/slos.md" ]] || fail "docs slos copied"
 [[ -f "$T_SLO/.agents/rules/slos-as-truth.md" ]] || fail "slos-as-truth rule"
 echo 'faculty-slo' > "$T_SLO/docs/slos.md"
-"$CLI" install "$T_SLO" --harness teaching --role materials --docs slos --yes
+"$CLI" install "$T_SLO" --harness education --role materials --docs slos --yes
 grep -q faculty-slo "$T_SLO/docs/slos.md" || fail "docs slos must not clobber"
-"$CLI" install "$T_SLO" --harness teaching --role materials --docs slos --force --yes
+"$CLI" install "$T_SLO" --harness education --role materials --docs slos --force --yes
 grep -q faculty-slo "$T_SLO/docs/slos.md" && fail "docs slos --force should replace"
 
 T_DOCUMENTS="$WORKDIR/documents-course"
 mkdir -p "$T_DOCUMENTS/documents"
-"$CLI" install "$T_DOCUMENTS" --harness teaching --role materials --docs slos --yes
+"$CLI" install "$T_DOCUMENTS" --harness education --role materials --docs slos --yes
 [[ -f "$T_DOCUMENTS/documents/slos.md" ]] || fail "slos into documents/"
 [[ -f "$T_DOCUMENTS/docs/slos.md" ]] && fail "must not create docs/ when documents/ exists"
 
 T_BOTH="$WORKDIR/both-docs"
 mkdir -p "$T_BOTH/docs" "$T_BOTH/documents"
-if "$CLI" install "$T_BOTH" --harness teaching --role materials --docs slos --yes 2>"$WORKDIR/err-docs"; then
+if "$CLI" install "$T_BOTH" --harness education --role materials --docs slos --yes 2>"$WORKDIR/err-docs"; then
   fail "should require --docs-root when both exist"
 fi
 grep -q 'docs-root' "$WORKDIR/err-docs" || fail "ambiguous docs-root message"
-"$CLI" install "$T_BOTH" --harness teaching --role materials --docs slos --docs-root documents --yes
+"$CLI" install "$T_BOTH" --harness education --role materials --docs slos --docs-root documents --yes
 [[ -f "$T_BOTH/documents/slos.md" ]] || fail "docs-root documents"
 [[ -f "$T_BOTH/docs/slos.md" ]] && fail "docs-root documents must not write docs/"
 
@@ -296,7 +302,7 @@ T_AIMS="$WORKDIR/aims-study"
 [[ -f "$T_AIMS/docs/aims.md" ]] || fail "aims.md"
 [[ -f "$T_AIMS/docs/protocol.md" ]] || fail "protocol.md"
 
-if "$CLI" install "$T_SLO" --harness teaching --role materials --docs nope --yes 2>"$WORKDIR/err-tmpl"; then
+if "$CLI" install "$T_SLO" --harness education --role materials --docs nope --yes 2>"$WORKDIR/err-tmpl"; then
   fail "unknown doc template should fail"
 fi
 grep -q 'unknown doc template' "$WORKDIR/err-tmpl" || fail "unknown template message"

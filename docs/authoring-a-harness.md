@@ -28,7 +28,7 @@ Add the harness under `harnesses:` in `catalog.yaml`:
   If a role package ships extra specialist agents, list those filenames too.
 - `workspace` path if you have a scaffold
 - optional `templates:` map (`id: { path, dest }`) for `--docs <id>` blanks.
-  Teaching ships `slos`; research ships `aims` and `protocol`. Product,
+  Education ships `slos`; research ships `aims` and `protocol`. Product,
   creative, and performance already scaffold their truth dirs
   (`docs/prd/`, `docs/brand/`, `docs/program/`). Finance scaffolds
   `docs/engagement/`, `docs/plan/`, `books/`, and `returns/`. AI uses `config.yaml`.
@@ -41,7 +41,7 @@ Add the harness under `harnesses:` in `catalog.yaml`:
 ./cli/symkit init /tmp/symkit-try --harness <name> --role <role> --scaffold --yes
 ```
 
-See `core/templates/new-harness.md` and `examples/teaching-overlay/`.
+See `core/templates/new-harness.md` and `examples/education-overlay/`.
 The installer is Rust (`src/`); you do not register packs in code.
 
 Skill **bodies** live in `core/library/skills/<name>/SKILL.md`. Who receives
@@ -51,6 +51,11 @@ A second name for one body is `library.skill_aliases`. `repro-check` points
 at `reproducibility-check` and is deprecated. List the target on roles. The
 installer accepts the old name, warns, installs the target directory, and
 prunes a directory left under the alias name.
+
+A second name for one harness is `harness_aliases`. `teaching` points at
+`education` and is deprecated. Commands accept the old name, warn on
+install, and record `education` in `.symkit/state.yaml`. Do not keep a
+`harnesses/<alias>/` directory beside the canonical tree.
 
 A role package may ship extra `.agents/agents/*.md` specialists (copywriter
 under creative-director, for example). The role agent is the session;

@@ -164,4 +164,4 @@ quote or line). Skip rows that the mode does not use.
 - Auto-publishing to an LMS or running a named campus scanner
 - Rewriting the whole assignment (`assignment-review` / `course-prep`)
 - Campus-specific offices, scanners, or deadlines — those live in the
-  **target course docs** or a teaching overlay, not this skill
+  **target course docs** or an education overlay, not this skill

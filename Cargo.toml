@@ -8,7 +8,7 @@ edition = "2024"
 rust-version = "1.85"
 authors = ["Nathaniel T. Berry"]
 license = "Apache-2.0"
-description = "Installable agent harnesses for teaching, research, AI, product, and engineering work"
+description = "Installable agent harnesses for education, research, AI, product, and engineering work"
 repository = "https://github.com/symworx/symkit"
 readme = "README.md"
 

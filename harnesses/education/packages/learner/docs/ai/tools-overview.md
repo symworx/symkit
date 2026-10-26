@@ -43,4 +43,4 @@ A starter file may ship as `packages/shared/AGENTS.md` in this kit.
 
 ---
 
-*Part of the teaching learner pack.*
+*Part of the education learner pack.*

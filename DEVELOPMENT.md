@@ -48,11 +48,11 @@ cargo clippy -- -D warnings
 ./cli/symkit --help
 ./cli/symkit guide
 ./cli/symkit list
-./cli/symkit show teaching
+./cli/symkit show education
 
 # Or call the binary directly
 cargo run -- list
-./target/debug/symkit show teaching
+./target/debug/symkit show education
 
 # Smoke tests (creates a temp dir, then removes it)
 ./tests/smoke.sh
@@ -136,7 +136,9 @@ enforced access control.
 
 Overlays vs new harnesses: an overlay is an extra package (`--pack` / `--also`)
 on an existing harness. A new harness is for a different default layout and
-role matrix. Copy `examples/teaching-overlay/` for the overlay pattern.
+role matrix. Copy `examples/education-overlay/` for the overlay pattern.
+`harness_aliases` keeps an old id (`teaching` → `education`); mark it
+`deprecated: true` so install warns and state records the canonical id.
 
 ## Code style
 
