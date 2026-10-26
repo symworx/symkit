@@ -211,6 +211,33 @@ TE="$WORKDIR/eng"
 [[ -f "$TE/.agents/rules/match-repo.md" ]] || fail "match-repo rule"
 [[ -d "$TE/.agents/skills/write-prd" ]] && fail "write-prd must not install on engineering"
 
+# finance harness
+TF="$WORKDIR/finance"
+"$CLI" init "$TF" --harness finance --role financial-advisor --scaffold --yes
+[[ -f "$TF/docs/engagement/README.md" ]] || fail "finance scaffold engagement"
+[[ -f "$TF/docs/plan/README.md" ]] || fail "finance scaffold plan"
+[[ -f "$TF/books/README.md" ]] || fail "finance scaffold books"
+[[ -f "$TF/.agents/agents/financial-advisor.md" ]] || fail "financial-advisor agent"
+[[ -f "$TF/.agents/agents/cpa.md" ]] || fail "cpa agent"
+[[ -f "$TF/.agents/agents/bookkeeper.md" ]] || fail "bookkeeper agent"
+[[ -f "$TF/.agents/agents/file-reviewer.md" ]] || fail "file-reviewer agent"
+[[ -f "$TF/.grok/agents/file-reviewer.md" ]] || fail "grok file-reviewer"
+[[ -f "$TF/.agents/rules/not-licensed.md" ]] || fail "not-licensed rule"
+[[ -f "$TF/.agents/rules/records-as-truth.md" ]] || fail "records-as-truth rule"
+[[ -f "$TF/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on financial-advisor"
+grep -q 'do not take the place of a professional financial advisor' "$TF/.agents/agents/financial-advisor.md" || fail "advisor disclaimer"
+grep -q 'do not take the place of a professional financial advisor' "$TF/.agents/agents/cpa.md" || fail "cpa disclaimer"
+"$CLI" show finance | grep -q $'financial-advisor\t.*\tbookkeeper file-reviewer$' || fail "show may_spawn bookkeeper file-reviewer"
+"$CLI" show finance | grep -q $'cpa\t.*\tbookkeeper file-reviewer$' || fail "show cpa may_spawn"
+"$CLI" install "$TF" --harness finance --role materials --yes
+[[ -f "$TF/.agents/agents/financial-advisor.md" ]] && fail "advisor should be pruned on materials"
+[[ -f "$TF/.agents/agents/cpa.md" ]] && fail "cpa should be pruned on materials"
+[[ -f "$TF/.agents/agents/bookkeeper.md" ]] && fail "bookkeeper should be pruned on materials"
+[[ -f "$TF/.agents/agents/file-reviewer.md" ]] && fail "file-reviewer should be pruned on materials"
+[[ -f "$TF/.grok/agents/bookkeeper.md" ]] && fail "grok bookkeeper should be pruned on materials"
+[[ -f "$TF/.agents/rules/not-licensed.md" ]] || fail "not-licensed stays on materials"
+[[ -d "$TF/.agents/skills/delegate" ]] && fail "delegate should be pruned on finance materials"
+
 # refuse kit root
 if "$CLI" install "$ROOT" --harness education --role materials --yes 2>"$WORKDIR/err2"; then
   fail "should refuse kit root"

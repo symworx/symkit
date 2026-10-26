@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Finance harness. `financial-advisor` and `cpa` are peer personas (alias
+  `fa`). Both may spawn `bookkeeper` and `file-reviewer`. Drafts do not
+  take the place of a licensed financial advisor or a certified public
+  accountant. `materials` prunes the personas and both leaves.
+
 ### Changed
 
 - Harness `teaching` is now `education`. `teaching` remains a deprecated

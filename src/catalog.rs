@@ -1113,6 +1113,29 @@ harnesses:
     }
 
     #[test]
+    fn resolve_finance_peers_spawn_leaves() {
+        let cat = load_repo();
+        let advisor = cat.resolve("finance", Some("financial-advisor"), &[]).unwrap();
+        assert_eq!(advisor.packages, ["shared", "financial-advisor", "cpa", "specialists"]);
+        assert_eq!(advisor.may_spawn, ["bookkeeper", "file-reviewer"]);
+        assert!(advisor.skills.contains(&"delegate".into()));
+        assert!(advisor.skills.contains(&"check-citations".into()));
+        let alias = cat.resolve("finance", Some("fa"), &[]).unwrap();
+        assert_eq!(alias.may_spawn, advisor.may_spawn);
+        let cpa = cat.resolve("finance", Some("cpa"), &[]).unwrap();
+        assert_eq!(cpa.packages, advisor.packages);
+        assert_eq!(cpa.may_spawn, advisor.may_spawn);
+        let materials = cat.resolve("finance", Some("materials"), &[]).unwrap();
+        assert_eq!(materials.packages, ["shared"]);
+        assert!(materials.may_spawn.is_empty());
+        assert!(!materials.skills.contains(&"delegate".into()));
+        assert_eq!(
+            materials.prune.agents,
+            ["financial-advisor", "cpa", "bookkeeper", "file-reviewer"]
+        );
+    }
+
+    #[test]
     fn teaching_alias_resolves_to_education() {
         let cat = load_repo();
         cat.check_harness_aliases(Path::new(env!("CARGO_MANIFEST_DIR")))
