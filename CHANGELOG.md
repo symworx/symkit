@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Harness `teaching` is now `education`. `teaching` remains a deprecated
   alias: `list` and `show` accept it, install warns, and `.symkit/state.yaml`
   records `education`. The tree is `harnesses/education/`.
+- Learner agent: a request to complete or write graded work starts in
+  `check-understanding` and waits for the student's attempt. `lab-tutor`
+  does not hand over the graded solution. `create-and-revise-docs` revises
+  only prose the student already wrote.
 
 ## [0.3.0] - 2026-10-26
 
