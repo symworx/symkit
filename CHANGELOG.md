@@ -9,8 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Role field `may_spawn`. Performance `coach` (and `performance-coach`) may
+  spawn `analyst`. Research `researcher` may spawn `reviewer`. Creative
+  `creative-director` (and `creative`) may spawn `copywriter` and `editor`.
+  Teaching `instructor` (and `faculty`) may spawn `materials-author`.
+  Those four sessions also receive the `delegate` skill. Install
+  refuses a missing agent file, a role that would leave that file behind,
+  and a role that both spawns and prunes the name. `materials` prunes the
+  role agent and its specialist.
+
 ### Changed
 
+- Skill `repro-check` is now `reproducibility-check`. `repro-check` remains a
+  deprecated alias: listing it installs `reproducibility-check` and prunes a
+  leftover `repro-check` directory.
 - GitHub Flow: default branch is `worx`; releases are tags on `worx` (no `stage` / `main` promotion). 
 
 ## [0.2.1] - 2026-09-17

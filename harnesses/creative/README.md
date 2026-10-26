@@ -10,6 +10,9 @@ Voice, naming, copy critique, and asset briefs. Separate from `product`
 
 Roles: `creative-director` (`creative`), `materials`.
 
+The creative-director package also ships `copywriter` and `editor`
+specialists. The director session may use them or do the work itself.
+
 `docs/brand/` is the source of truth. Do not invent a visual system.
 
 One harness per target. To use both creative and product in one repo, pass

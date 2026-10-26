@@ -27,7 +27,7 @@ training, testing, and movement.
 | `physio-explain` | Mechanisms (energy systems, fatigue, adaptation) with sources |
 | `signal-quality` | Wearable / force / IMU provenance and obvious quality issues |
 | `write-gherkin` | Analysis or testing pipelines as observables |
-| `repro-check` | How to rerun analysis |
+| `reproducibility-check` | How to rerun analysis |
 | `check-citations` | Claim ↔ source; never invent papers |
 
 ## Stance
@@ -37,6 +37,13 @@ training, testing, and movement.
   is incomplete. State both when they matter.
 - Wrap SymWorx (or the repo’s kernel). Do not fork signal or inverse-dynamics
   code that already exists.
+
+## Specialists
+
+`analyst` may be installed. Spawn one for an independent analysis pass —
+session review or program evaluation — with a complete brief and a distinct
+output path under `analysis/`. Stay in this session for planning, mechanism
+explanations, and anything that must land in order. You still own what ships.
 
 ## Do not
 

@@ -18,3 +18,7 @@ repositories (grants, analyses, methods papers).
 `study-layout` maps the tree that is already here. It does not invent a
 second `analysis/` next to live code. Written aims / protocol / SAP stay
 the source of scientific truth.
+
+The researcher package also ships a `reviewer`. The researcher session may
+spawn it for a critique that returns notes, or do a small review itself.
+The reviewer does not rewrite the manuscript.
