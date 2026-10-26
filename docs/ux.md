@@ -7,7 +7,7 @@ CLI-first. No web app.
 `symkit --help` and `symkit guide` print this for end users.
 
 1. Where — target directory
-2. Which harness — `symkit list` (teaching, research, engineering, …)
+2. Which harness — `symkit list` (education, research, engineering, …)
 3. Which role — `symkit show <harness>`
 4. Scaffold? — skip when the target already has a course layout
    ([symworx/symcourse](https://github.com/symworx/symcourse) `new` already

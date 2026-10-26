@@ -10,15 +10,15 @@ FLOW
   2. init DIR        new workspace  (add --scaffold for folder stubs)
      install DIR     existing repo  (pass --scaffold only if you want stubs)
                      --docs ID      copy a catalogued blank (slos, aims, …)
-                     --migration-docs  local PDF/DOCX dump dir (teaching)
+                     --migration-docs  local PDF/DOCX dump dir (education)
   3. Read the preview. Nothing is committed.
   4. In the target: git status. Commit public / student-safe paths only.
 
 EXAMPLES
   cargo install --locked symkit # or GitHub Release / ./cli/symkit
   symkit list
-  symkit show teaching
-  symkit init ~/course --harness teaching --role instructor --scaffold --docs slos
+  symkit show education
+  symkit init ~/course --harness education --role instructor --scaffold --docs slos
   symkit install ~/study --harness research --role researcher --docs aims --docs protocol
 
 WRITES   AGENTS-SYMKIT.md (harness, last pack wins), AGENTS.md pointer
@@ -60,7 +60,7 @@ HOW TO GET THE BINARY
 
 PRIMARY FLOW
   symkit list                         # harnesses and default roles
-  symkit show <harness>               # packs, roles, skills, may_spawn, skill aliases
+  symkit show <harness>               # packs, roles, skills, may_spawn, aliases
   symkit init <dir> --harness … --role … [--scaffold]
   symkit install <dir> --harness … --role …
 
@@ -87,15 +87,16 @@ WHAT TO COMMIT IN THE TARGET
                 (harness defaults), docs/ literacy or aims, --docs blanks
                 (slos.md, aims.md, …), workspace stubs (assignments/, …)
   Usually no:   .agents/, .grok/, .claude/, .codex/, .symkit/
-  Teaching:     staff / instructor / ta packs stay off student-facing git.
+  Education:    staff / instructor / ta packs stay off student-facing git.
 
 ONE HARNESS PER TARGET
   Mixing prints a warning. Extra in-catalog packs: --also <pack>.
   --pack replaces the role's pack list and does not apply role skills.
-  Do not install teaching --role instructor then --role learner on one tree.
+  Do not install education --role instructor then --role learner on one tree.
+  `teaching` is a deprecated alias for `education`.
 
 COURSE REPOS
-  Usual teaching path: csymd/symcourse new (it runs this installer;
+  Usual course path: csymd/symcourse new (it runs this installer;
   --symkit PATH if not on PATH). Do not pass --scaffold on that tree.
   Kit-only folder stubs: init --scaffold.
   --migration-docs: local PDF/DOCX dump dir (migrate-course skill).

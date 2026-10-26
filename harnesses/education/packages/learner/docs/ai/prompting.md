@@ -62,4 +62,4 @@ See [when-not-to.md](when-not-to.md) and [disclosure.md](disclosure.md).
 
 ---
 
-*Part of the teaching learner pack.*
+*Part of the education learner pack.*

@@ -108,4 +108,4 @@ If assist is most of your time, you are probably outsourcing the learning.
 
 ---
 
-*Part of the teaching learner pack. Syllabus and LMS override this guide.*
+*Part of the education learner pack. Syllabus and LMS override this guide.*

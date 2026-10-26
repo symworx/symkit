@@ -6,7 +6,7 @@ version: 4
 
 kit:
   name: symkit
-  description: Installable agent harnesses for teaching, research, AI, product, creative, performance, and engineering work
+  description: Installable agent harnesses for education, research, AI, product, creative, performance, and engineering work
 
 adapters:
   default: [grok]
@@ -44,37 +44,42 @@ core:
   always_skills: [check-citations]
   templates: core/templates
 
-harnesses:
+harness_aliases:
   teaching:
+    target: education
+    deprecated: true
+
+harnesses:
+  education:
     status: active
     description: Course materials, staff and learner agents, assignment structure
     default_role: instructor
     offer_migration_docs: true
-    workspace: harnesses/teaching/workspace
+    workspace: harnesses/education/workspace
     templates:
       slos:
-        path: harnesses/teaching/templates/slos.md
+        path: harnesses/education/templates/slos.md
         dest: slos.md
     packages:
       shared:
         description: Materials AGENTS, course-materials and slos-as-truth rules
-        path: harnesses/teaching/packages/shared
+        path: harnesses/education/packages/shared
         student_safe: true
       staff:
         description: Engagement norms (evaluate-content is assigned via role skills)
-        path: harnesses/teaching/packages/staff
+        path: harnesses/education/packages/staff
         student_safe: false
       instructor:
         description: Instructor agent plus instructor-only rules
-        path: harnesses/teaching/packages/instructor
+        path: harnesses/education/packages/instructor
         student_safe: false
       ta:
         description: TA agent only (pair with staff; no course design skills)
-        path: harnesses/teaching/packages/ta
+        path: harnesses/education/packages/ta
         student_safe: false
       learner:
         description: Student literacy docs plus learner agent and study skills
-        path: harnesses/teaching/packages/learner
+        path: harnesses/education/packages/learner
         student_safe: true
     roles:
       instructor:

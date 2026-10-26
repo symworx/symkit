@@ -57,6 +57,12 @@ pub fn preview(req: &InstallRequest, docs_root: &str) {
     println!("Kit:      {}", req.kit_root.display());
     println!("Target:   {}", req.target.display());
     println!("Harness:  {}", req.resolved.harness);
+    if let Some(alias) = &req.resolved.deprecated_harness {
+        println!(
+            "Note:     harness '{alias}' is deprecated; use '{}'",
+            req.resolved.harness
+        );
+    }
     let role = if req.resolved.role.is_empty() {
         "(explicit packs)"
     } else {
@@ -152,6 +158,7 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     }
     req.catalog.check_spawn_agents(&req.kit_root)?;
     req.catalog.check_skill_aliases(&req.kit_root)?;
+    req.catalog.check_harness_aliases(&req.kit_root)?;
 
     if let Some(existing) = read_existing_harness(&req.target, &req.catalog) {
         if existing != req.resolved.harness {
@@ -534,7 +541,7 @@ fn read_existing_harness(target: &Path, catalog: &Catalog) -> Option<String> {
         if let Some(rest) = line.strip_prefix("harness:") {
             let v = rest.trim();
             if !v.is_empty() {
-                return Some(v.to_string());
+                return Some(catalog.canonical_harness(v).to_string());
             }
         }
     }

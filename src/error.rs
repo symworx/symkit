@@ -47,6 +47,8 @@ pub enum Error {
     UnknownSkill { name: String, path: PathBuf },
     #[error("skill alias '{name}' is invalid: {reason}")]
     InvalidSkillAlias { name: String, reason: String },
+    #[error("harness alias '{name}' is invalid: {reason}")]
+    InvalidHarnessAlias { name: String, reason: String },
     #[error("role '{role}' on {harness} has invalid may_spawn name '{name}'")]
     InvalidSpawnAgent {
         harness: String,

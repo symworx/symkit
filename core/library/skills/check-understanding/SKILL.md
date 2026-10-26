@@ -2,8 +2,10 @@
 name: check-understanding
 description: >
   Probe a student's understanding against assignment or module goals: find gaps,
-  shaky steps, and what to re-study. Triggers: quiz me, am I ready, check
-  understanding, gaps, self-check, check-understanding.
+  shaky steps, and what to re-study. Entry when they ask to complete, finish,
+  or do the task. Triggers: quiz me, am I ready, check understanding, gaps,
+  self-check, check-understanding, complete this task, do this for me,
+  finish my assignment.
 ---
 
 <!--
@@ -31,11 +33,12 @@ Help the student **find gaps** in understanding—not to grade them officially.
 
 ## Process
 
-1. Restate goals in 2–4 bullets (their words + assignment).  
-2. Ask or apply **targeted probes** (concepts, steps, edge cases, validity).  
-3. Classify each area: **solid / shaky / missing**.  
-4. Recommend a **minimal next study action** per gap (read X, re-run Y, rewrite Z).  
-5. Optional: 3–5 self-check questions **without full solutions** (hints OK).
+1. If they want the graded work done for them and have not reported a try: ask what “done” means and what they predict the next step is. Output those questions only. Stop.  
+2. Restate goals in 2–4 bullets (their words + assignment).  
+3. Ask or apply **targeted probes** (concepts, steps, edge cases, validity).  
+4. Classify each area: **solid / shaky / missing**.  
+5. Recommend a **minimal next study action** per gap (read X, re-run Y, rewrite Z).  
+6. Optional: 3–5 self-check questions **without full solutions** (hints OK).
 
 ## Do
 
@@ -46,11 +49,15 @@ Help the student **find gaps** in understanding—not to grade them officially.
 ## Don’t
 
 - Replace the instructor or peer-review grade.  
-- Hand over a complete worked solution as the default.  
+- Hand over a worked solution or the graded artifact.  
 - Invent requirements not in the assignment.  
 - Shame; keep tone professional and practical.
 
 ## Output
+
+On the stop in process step 1: the two questions only.
+
+After they have reported a try:
 
 1. **Goals assumed**  
 2. **Solid** (keep)  
@@ -62,4 +69,4 @@ Help the student **find gaps** in understanding—not to grade them officially.
 
 - Plan study time: **`study-plan`**  
 - Stuck mid-lab: **`lab-tutor`**  
-- Draft the write-up: **`create-and-revise-docs`**  
+- Revise a write-up they already drafted: **`create-and-revise-docs`**  

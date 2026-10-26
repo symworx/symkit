@@ -6,7 +6,7 @@ Adds the **instructor** agent and instructor-only *rules*. Skills
 `core/library/skills/` and are assigned in `catalog.yaml`.
 
 ```bash
-./cli/symkit install /path/to/course --harness teaching --role instructor
+./cli/symkit install /path/to/course --harness education --role instructor
 ```
 
 | Contents | Path |
