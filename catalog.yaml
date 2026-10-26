@@ -6,7 +6,7 @@ version: 4
 
 kit:
   name: symkit
-  description: Installable agent harnesses for teaching, research, AI, product, creative, performance, and engineering work
+  description: Installable agent harnesses for teaching, research, AI, product, creative, performance, engineering, and finance work
 
 adapters:
   default: [grok]
@@ -293,3 +293,45 @@ harnesses:
     prune:
       materials:
         agents: [engineer]
+
+  finance:
+    status: active
+    description: Financial planning and tax work from a written record
+    default_role: financial-advisor
+    workspace: harnesses/finance/workspace
+    packages:
+      shared:
+        description: Finance AGENTS, records-as-truth, not-licensed
+        path: harnesses/finance/packages/shared
+        student_safe: true
+      financial-advisor:
+        description: Financial-advisor persona (peer of the CPA)
+        path: harnesses/finance/packages/financial-advisor
+        student_safe: true
+      cpa:
+        description: CPA persona (peer of the financial advisor)
+        path: harnesses/finance/packages/cpa
+        student_safe: true
+      specialists:
+        description: Bookkeeper and file-reviewer leaves
+        path: harnesses/finance/packages/specialists
+        student_safe: true
+    roles:
+      financial-advisor:
+        packages: [shared, financial-advisor, cpa, specialists]
+        may_spawn: [bookkeeper, file-reviewer]
+        skills: [delegate]
+      fa:
+        packages: [shared, financial-advisor, cpa, specialists]
+        may_spawn: [bookkeeper, file-reviewer]
+        skills: [delegate]
+      cpa:
+        packages: [shared, financial-advisor, cpa, specialists]
+        may_spawn: [bookkeeper, file-reviewer]
+        skills: [delegate]
+      materials:
+        packages: [shared]
+        skills: []
+    prune:
+      materials:
+        agents: [financial-advisor, cpa, bookkeeper, file-reviewer]

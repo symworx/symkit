@@ -30,7 +30,8 @@ Add the harness under `harnesses:` in `catalog.yaml`:
 - optional `templates:` map (`id: { path, dest }`) for `--docs <id>` blanks.
   Teaching ships `slos`; research ships `aims` and `protocol`. Product,
   creative, and performance already scaffold their truth dirs
-  (`docs/prd/`, `docs/brand/`, `docs/program/`). AI uses `config.yaml`.
+  (`docs/prd/`, `docs/brand/`, `docs/program/`). Finance scaffolds
+  `docs/engagement/`, `docs/plan/`, `books/`, and `returns/`. AI uses `config.yaml`.
   Engineering follows existing code — do not add a parallel spec template.
 
 ## Check

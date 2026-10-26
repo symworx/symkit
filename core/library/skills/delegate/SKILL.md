@@ -17,9 +17,9 @@ Hand off one independent artifact. The session still decides what ships.
 
 ## When
 
-Read the installed session persona under `.agents/agents/` (`instructor`,
-`researcher`, `creative-director`, or `coach`). Spawn a specialist only
-when that persona names it and the work has its own output path.
+Read the installed session persona under `.agents/agents/`. Spawn a
+specialist only when that persona names it and the work has its own
+output path.
 
 Stay in this session when the user is iterating with you, the piece is
 small, or the next step depends on what you just wrote.
