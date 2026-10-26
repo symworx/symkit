@@ -2,7 +2,8 @@
 name: review-manuscript
 description: >
   Structured critical review of a scientific manuscript (peer-review style).
-  Use with the researcher agent before submission or coauthor feedback.
+  Use with the researcher agent, or the reviewer it spawns, before
+  submission or coauthor feedback.
   Triggers: review paper, peer review, critique manuscript, pre-submission
   review, review-manuscript, /review-manuscript.
 ---

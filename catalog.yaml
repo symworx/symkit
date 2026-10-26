@@ -79,12 +79,14 @@ harnesses:
     roles:
       instructor:
         packages: [shared, staff, instructor]
+        may_spawn: [materials-author]
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
            assignment-review, accessibility-review, release-materials,
            migrate-course]
       faculty:
         packages: [shared, staff, instructor]
+        may_spawn: [materials-author]
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
            assignment-review, accessibility-review, release-materials,
@@ -128,16 +130,23 @@ harnesses:
         description: Research AGENTS, aims-as-truth, layout conventions
         path: harnesses/research/packages/shared
         student_safe: true
+      researcher:
+        description: Researcher agent plus reviewer specialist
+        path: harnesses/research/packages/researcher
+        student_safe: true
     roles:
       researcher:
-        packages: [shared]
+        packages: [shared, researcher]
+        may_spawn: [reviewer]
         skills:
           [write-gherkin, study-layout, reproducibility-check, write-manuscript,
            write-abstract, review-manuscript, lit-matrix, response-to-reviewers]
       materials:
         packages: [shared]
         skills: [write-gherkin, study-layout, reproducibility-check]
-    prune: {}
+    prune:
+      materials:
+        agents: [researcher, reviewer]
 
   ai:
     status: active
@@ -205,10 +214,12 @@ harnesses:
     roles:
       creative-director:
         packages: [shared, creative-director]
+        may_spawn: [copywriter, editor]
         skills:
           [brand-voice, critique-copy, naming, asset-brief, accessibility-review]
       creative:
         packages: [shared, creative-director]
+        may_spawn: [copywriter, editor]
         skills:
           [brand-voice, critique-copy, naming, asset-brief, accessibility-review]
       materials:

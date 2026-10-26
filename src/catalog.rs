@@ -703,9 +703,12 @@ mod tests {
         let cat = load_repo();
         let r = cat.resolve("teaching", Some("instructor"), &[]).unwrap();
         assert_eq!(r.packages, ["shared", "staff", "instructor"]);
+        assert_eq!(r.may_spawn, ["materials-author"]);
         assert_eq!(r.private, ["staff", "instructor"]);
         assert_eq!(r.student_safe, ["shared"]);
         assert_eq!(r.prune.agents, ["ta"]);
+        let faculty = cat.resolve("teaching", Some("faculty"), &[]).unwrap();
+        assert_eq!(faculty.may_spawn, ["materials-author"]);
         assert!(r.skills.contains(&"check-citations".into()));
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"course-prep".into()));
@@ -717,13 +720,19 @@ mod tests {
     fn resolve_researcher_skills() {
         let cat = load_repo();
         let r = cat.resolve("research", Some("researcher"), &[]).unwrap();
-        assert_eq!(r.packages, ["shared"]);
+        assert_eq!(r.packages, ["shared", "researcher"]);
+        assert_eq!(r.may_spawn, ["reviewer"]);
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"write-manuscript".into()));
+        assert!(r.skills.contains(&"review-manuscript".into()));
         assert!(r.skills.contains(&"reproducibility-check".into()));
         assert!(!r.skills.iter().any(|skill| skill == "repro-check"));
         assert!(r.deprecated_skills.is_empty());
         assert!(!r.skills.contains(&"course-prep".into()));
+        let materials = cat.resolve("research", Some("materials"), &[]).unwrap();
+        assert_eq!(materials.packages, ["shared"]);
+        assert!(materials.may_spawn.is_empty());
+        assert_eq!(materials.prune.agents, ["researcher", "reviewer"]);
     }
 
     #[test]
@@ -963,8 +972,13 @@ harnesses:
         let cat = load_repo();
         let r = cat.resolve("creative", Some("creative"), &[]).unwrap();
         assert_eq!(r.packages, ["shared", "creative-director"]);
+        assert_eq!(r.may_spawn, ["copywriter", "editor"]);
         assert!(r.skills.contains(&"naming".into()));
         assert!(!r.skills.iter().any(|s| s == "write-prd"));
+        let director = cat
+            .resolve("creative", Some("creative-director"), &[])
+            .unwrap();
+        assert_eq!(director.may_spawn, ["copywriter", "editor"]);
     }
 
     #[test]
