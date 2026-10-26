@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Role field `may_spawn`. Performance `coach` (and `performance-coach`) may
   spawn `analyst`. Research `researcher` may spawn `reviewer`. Creative
   `creative-director` (and `creative`) may spawn `copywriter` and `editor`.
-  Teaching `instructor` (and `faculty`) may spawn `materials-author`. Install
+  Teaching `instructor` (and `faculty`) may spawn `materials-author`.
+  Those four sessions also receive the `delegate` skill. Install
   refuses a missing agent file, a role that would leave that file behind,
   and a role that both spawns and prunes the name. `materials` prunes the
   role agent and its specialist.

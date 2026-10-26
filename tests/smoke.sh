@@ -49,6 +49,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 "$CLI" install "$T1" --harness teaching --role instructor --yes
 [[ -f "$T1/.agents/agents/instructor.md" ]] || fail "instructor agent"
 [[ -d "$T1/.agents/skills/course-prep" ]] || fail "course-prep after instructor"
+[[ -f "$T1/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on instructor"
 [[ -d "$T1/.agents/skills/migrate-course" ]] || fail "migrate-course after instructor"
 [[ -d "$T1/.agents/skills/accessibility-review" ]] || fail "accessibility-review after instructor"
 [[ -d "$T1/.grok/skills/course-prep" ]] || fail "grok adapter course-prep"
@@ -58,6 +59,7 @@ grep -q 'BEGIN symkit harness' "$T1/AGENTS.md" || fail "materials AGENTS.md poin
 # TA prunes instructor-only
 "$CLI" install "$T1" --harness teaching --role ta --yes
 [[ -d "$T1/.agents/skills/course-prep" ]] && fail "course-prep should be pruned on ta"
+[[ -d "$T1/.agents/skills/delegate" ]] && fail "delegate should be pruned on ta"
 [[ -d "$T1/.agents/skills/migrate-course" ]] && fail "migrate-course should be pruned on ta"
 [[ -d "$T1/.agents/skills/accessibility-review" ]] && fail "accessibility-review should be pruned on ta"
 [[ -f "$T1/.agents/agents/instructor.md" ]] && fail "instructor agent should be pruned on ta"
@@ -72,6 +74,7 @@ mkdir -p "$T2"
 "$CLI" install "$T2" --harness teaching --role learner --yes --adapters none
 [[ -f "$T2/docs/ai-what-to-expect.md" ]] || fail "learner docs"
 [[ -f "$T2/.agents/agents/learner.md" ]] || fail "learner agent"
+[[ -d "$T2/.agents/skills/delegate" ]] && fail "delegate must not install on learner"
 [[ -d "$T2/.agents/skills/migrate-course" ]] && fail "migrate-course must not install on learner"
 # pack docs skip existing (course-owned AI policy)
 T_AI="$WORKDIR/keep-ai"
@@ -124,6 +127,7 @@ echo stale > "$T4/.agents/skills/repro-check/SKILL.md"
 [[ -f "$T4/.agents/skills/check-citations/SKILL.md" ]] || fail "core check-citations on research"
 [[ -f "$T4/.agents/skills/write-gherkin/SKILL.md" ]] || fail "write-gherkin on research"
 [[ -f "$T4/.agents/skills/write-manuscript/SKILL.md" ]] || fail "write-manuscript on research"
+[[ -f "$T4/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on researcher"
 [[ -d "$T4/.agents/skills/course-prep" ]] && fail "course-prep must not install on research"
 "$CLI" show research | grep -q $'researcher\t.*\treviewer$' || fail "show may_spawn reviewer"
 "$CLI" install "$T4" --harness research --role materials --yes
@@ -131,6 +135,7 @@ echo stale > "$T4/.agents/skills/repro-check/SKILL.md"
 [[ -f "$T4/.agents/agents/reviewer.md" ]] && fail "reviewer should be pruned on materials"
 [[ -f "$T4/.grok/agents/reviewer.md" ]] && fail "grok reviewer should be pruned on materials"
 [[ -f "$T4/.agents/rules/aims-as-truth.md" ]] || fail "aims-as-truth stays on materials"
+[[ -d "$T4/.agents/skills/delegate" ]] && fail "delegate should be pruned on research materials"
 
 T5="$WORKDIR/eval"
 "$CLI" init "$T5" --harness ai --role experimenter --scaffold --yes

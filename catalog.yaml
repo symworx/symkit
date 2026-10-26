@@ -83,14 +83,14 @@ harnesses:
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
            assignment-review, accessibility-review, release-materials,
-           migrate-course]
+           migrate-course, delegate]
       faculty:
         packages: [shared, staff, instructor]
         may_spawn: [materials-author]
         skills:
           [write-gherkin, evaluate-content, course-prep, week-plan,
            assignment-review, accessibility-review, release-materials,
-           migrate-course]
+           migrate-course, delegate]
       ta:
         packages: [shared, staff, ta]
         skills: [write-gherkin, evaluate-content]
@@ -140,7 +140,8 @@ harnesses:
         may_spawn: [reviewer]
         skills:
           [write-gherkin, study-layout, reproducibility-check, write-manuscript,
-           write-abstract, review-manuscript, lit-matrix, response-to-reviewers]
+           write-abstract, review-manuscript, lit-matrix, response-to-reviewers,
+           delegate]
       materials:
         packages: [shared]
         skills: [write-gherkin, study-layout, reproducibility-check]
@@ -216,12 +217,14 @@ harnesses:
         packages: [shared, creative-director]
         may_spawn: [copywriter, editor]
         skills:
-          [brand-voice, critique-copy, naming, asset-brief, accessibility-review]
+          [brand-voice, critique-copy, naming, asset-brief, accessibility-review,
+           delegate]
       creative:
         packages: [shared, creative-director]
         may_spawn: [copywriter, editor]
         skills:
-          [brand-voice, critique-copy, naming, asset-brief, accessibility-review]
+          [brand-voice, critique-copy, naming, asset-brief, accessibility-review,
+           delegate]
       materials:
         packages: [shared]
         skills: [brand-voice, accessibility-review]
@@ -249,13 +252,13 @@ harnesses:
         may_spawn: [analyst]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, reproducibility-check]
+           signal-quality, write-gherkin, reproducibility-check, delegate]
       performance-coach:
         packages: [shared, coach]
         may_spawn: [analyst]
         skills:
           [session-plan, program-check, movement-review, physio-explain,
-           signal-quality, write-gherkin, reproducibility-check]
+           signal-quality, write-gherkin, reproducibility-check, delegate]
       materials:
         packages: [shared]
         skills: [write-gherkin, reproducibility-check]

@@ -713,7 +713,9 @@ mod tests {
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"course-prep".into()));
         assert!(r.skills.contains(&"migrate-course".into()));
+        assert!(r.skills.contains(&"delegate".into()));
         assert_eq!(r.library_skills, "core/library/skills");
+        assert!(faculty.skills.contains(&"delegate".into()));
     }
 
     #[test]
@@ -725,6 +727,7 @@ mod tests {
         assert!(r.skills.contains(&"write-gherkin".into()));
         assert!(r.skills.contains(&"write-manuscript".into()));
         assert!(r.skills.contains(&"review-manuscript".into()));
+        assert!(r.skills.contains(&"delegate".into()));
         assert!(r.skills.contains(&"reproducibility-check".into()));
         assert!(!r.skills.iter().any(|skill| skill == "repro-check"));
         assert!(r.deprecated_skills.is_empty());
@@ -732,6 +735,7 @@ mod tests {
         let materials = cat.resolve("research", Some("materials"), &[]).unwrap();
         assert_eq!(materials.packages, ["shared"]);
         assert!(materials.may_spawn.is_empty());
+        assert!(!materials.skills.contains(&"delegate".into()));
         assert_eq!(materials.prune.agents, ["researcher", "reviewer"]);
     }
 
@@ -805,6 +809,7 @@ harnesses: {}
         let cat = load_repo();
         let r = cat.resolve("teaching", Some("learner"), &[]).unwrap();
         assert!(r.skills.contains(&"lab-tutor".into()));
+        assert!(!r.skills.contains(&"delegate".into()));
         assert!(!r.skills.contains(&"write-gherkin".into()));
         assert!(!r.skills.contains(&"evaluate-content".into()));
         assert!(!r.skills.contains(&"migrate-course".into()));
@@ -842,11 +847,13 @@ harnesses: {}
         assert_eq!(r.packages, ["shared", "coach"]);
         assert_eq!(r.may_spawn, ["analyst"]);
         assert!(r.skills.contains(&"session-plan".into()));
+        assert!(r.skills.contains(&"delegate".into()));
         assert!(r.skills.contains(&"movement-review".into()));
         assert!(r.skills.contains(&"physio-explain".into()));
         assert!(!r.skills.contains(&"course-prep".into()));
         let alias = cat.resolve("performance", Some("performance-coach"), &[]).unwrap();
         assert_eq!(alias.may_spawn, ["analyst"]);
+        assert!(alias.skills.contains(&"delegate".into()));
         let materials = cat.resolve("performance", Some("materials"), &[]).unwrap();
         assert!(materials.may_spawn.is_empty());
         assert_eq!(materials.prune.agents, ["coach", "analyst"]);
@@ -974,11 +981,13 @@ harnesses:
         assert_eq!(r.packages, ["shared", "creative-director"]);
         assert_eq!(r.may_spawn, ["copywriter", "editor"]);
         assert!(r.skills.contains(&"naming".into()));
+        assert!(r.skills.contains(&"delegate".into()));
         assert!(!r.skills.iter().any(|s| s == "write-prd"));
         let director = cat
             .resolve("creative", Some("creative-director"), &[])
             .unwrap();
         assert_eq!(director.may_spawn, ["copywriter", "editor"]);
+        assert!(director.skills.contains(&"delegate".into()));
     }
 
     #[test]
