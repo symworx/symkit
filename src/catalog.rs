@@ -33,6 +33,9 @@ pub struct Catalog {
     pub core: CorePaths,
     #[serde(default)]
     pub harnesses: BTreeMap<String, Harness>,
+    /// Old harness id → canonical harness. One tree on disk.
+    #[serde(default)]
+    pub harness_aliases: BTreeMap<String, HarnessAlias>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -112,6 +115,13 @@ pub struct Library {
 
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct SkillAlias {
+    pub target: String,
+    #[serde(default)]
+    pub deprecated: bool,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct HarnessAlias {
     pub target: String,
     #[serde(default)]
     pub deprecated: bool,
@@ -235,6 +245,8 @@ pub struct PruneSpec {
 #[derive(Debug, Clone)]
 pub struct Resolve {
     pub harness: String,
+    /// Set when the requested id was a deprecated alias. Install records `harness`.
+    pub deprecated_harness: Option<String>,
     pub role: String,
     pub packages: Vec<String>,
     pub skills: Vec<String>,
@@ -259,14 +271,30 @@ impl Catalog {
         Ok(serde_yaml::from_str(&text)?)
     }
 
+    pub fn canonical_harness<'a>(&'a self, name: &'a str) -> &'a str {
+        self.harness_aliases
+            .get(name)
+            .map(|alias| alias.target.as_str())
+            .unwrap_or(name)
+    }
+
     pub fn harness(&self, name: &str) -> Result<&Harness> {
-        self.harnesses.get(name).ok_or_else(|| Error::UnknownHarness {
+        let canonical = self.canonical_harness(name);
+        self.harnesses.get(canonical).ok_or_else(|| Error::UnknownHarness {
             name: name.to_string(),
             known: join_keys(&self.harnesses),
         })
     }
 
     pub fn resolve(&self, harness: &str, role: Option<&str>, extra_packs: &[String]) -> Result<Resolve> {
+        let deprecated_harness = self.harness_aliases.get(harness).and_then(|alias| {
+            if alias.deprecated {
+                Some(harness.to_string())
+            } else {
+                None
+            }
+        });
+        let harness = self.canonical_harness(harness);
         let h = self.harness(harness)?;
         if h.status != "active" {
             return Err(Error::NotInstallable(harness.to_string(), h.status.clone()));
@@ -339,6 +367,7 @@ impl Catalog {
 
         Ok(Resolve {
             harness: harness.to_string(),
+            deprecated_harness,
             role: used_role,
             packages: selected,
             skills,
@@ -406,6 +435,11 @@ impl Catalog {
             &["HARNESS", "STATUS", "DEFAULT_ROLE", "DESCRIPTION"],
             &rows,
         ));
+        let harness_aliases = self.format_harness_aliases(None);
+        if !harness_aliases.is_empty() {
+            out.push('\n');
+            out.push_str(&harness_aliases);
+        }
         let aliases = self.format_skill_aliases();
         if !aliases.is_empty() {
             out.push('\n');
@@ -415,9 +449,15 @@ impl Catalog {
     }
 
     pub fn format_show(&self, name: &str) -> Result<String> {
-        let h = self.harness(name)?;
+        let canonical = self.canonical_harness(name);
+        let h = self.harness(canonical)?;
         let mut out = String::new();
-        out.push_str(&format!("HARNESS={name}\n"));
+        out.push_str(&format!("HARNESS={canonical}\n"));
+        if let Some(alias) = self.harness_aliases.get(name) {
+            if alias.deprecated {
+                out.push_str(&format!("NOTE=harness '{name}' is deprecated; use '{canonical}'\n"));
+            }
+        }
         out.push_str(&format!("STATUS={}\n", h.status));
         out.push_str(&format!("DESCRIPTION={}\n", h.description));
         out.push_str(&format!("DEFAULT_ROLE={}\n", h.default_role));
@@ -446,6 +486,11 @@ impl Catalog {
                 spec.packages().join(" "),
                 spec.may_spawn().join(" ")
             ));
+        }
+        let harness_aliases = self.format_harness_aliases(Some(canonical));
+        if !harness_aliases.is_empty() {
+            out.push('\n');
+            out.push_str(&harness_aliases);
         }
         let aliases = self.format_skill_aliases();
         if !aliases.is_empty() {
@@ -478,6 +523,28 @@ impl Catalog {
             }
         }
         (out, deprecated)
+    }
+
+    fn format_harness_aliases(&self, target: Option<&str>) -> String {
+        let rows: Vec<Vec<String>> = self
+            .harness_aliases
+            .iter()
+            .filter(|(_, alias)| match target {
+                Some(name) => alias.target == name,
+                None => true,
+            })
+            .map(|(name, alias)| {
+                vec![
+                    name.clone(),
+                    alias.target.clone(),
+                    if alias.deprecated { "yes" } else { "no" }.to_string(),
+                ]
+            })
+            .collect();
+        if rows.is_empty() {
+            return String::new();
+        }
+        aligned_table(&["HARNESS_ALIAS", "TARGET", "DEPRECATED"], &rows)
     }
 
     fn format_skill_aliases(&self) -> String {
@@ -526,6 +593,44 @@ impl Catalog {
                 return Err(Error::InvalidSkillAlias {
                     name: name.clone(),
                     reason: format!("alias name is also a skill directory ({})", alias_dir.display()),
+                });
+            }
+        }
+        Ok(())
+    }
+
+    /// Alias targets are harness ids. Alias names are not harness directories.
+    pub fn check_harness_aliases(&self, kit: &Path) -> Result<()> {
+        for (name, alias) in &self.harness_aliases {
+            if !valid_agent_stem(name) {
+                return Err(Error::InvalidHarnessAlias {
+                    name: name.clone(),
+                    reason: "name must be a bare harness id".into(),
+                });
+            }
+            if !valid_agent_stem(&alias.target) || self.harness_aliases.contains_key(&alias.target) {
+                return Err(Error::InvalidHarnessAlias {
+                    name: name.clone(),
+                    reason: format!("target '{}' must be a harness id, not another alias", alias.target),
+                });
+            }
+            if !self.harnesses.contains_key(&alias.target) {
+                return Err(Error::InvalidHarnessAlias {
+                    name: name.clone(),
+                    reason: format!("target '{}' is not a harness", alias.target),
+                });
+            }
+            if self.harnesses.contains_key(name) {
+                return Err(Error::InvalidHarnessAlias {
+                    name: name.clone(),
+                    reason: "alias name is also a harness id".into(),
+                });
+            }
+            let shadow = kit.join("harnesses").join(name);
+            if shadow.is_dir() {
+                return Err(Error::InvalidHarnessAlias {
+                    name: name.clone(),
+                    reason: format!("alias name is also a harness directory ({})", shadow.display()),
                 });
             }
         }
@@ -701,13 +806,13 @@ mod tests {
     #[test]
     fn resolve_instructor() {
         let cat = load_repo();
-        let r = cat.resolve("teaching", Some("instructor"), &[]).unwrap();
+        let r = cat.resolve("education", Some("instructor"), &[]).unwrap();
         assert_eq!(r.packages, ["shared", "staff", "instructor"]);
         assert_eq!(r.may_spawn, ["materials-author"]);
         assert_eq!(r.private, ["staff", "instructor"]);
         assert_eq!(r.student_safe, ["shared"]);
         assert_eq!(r.prune.agents, ["ta"]);
-        let faculty = cat.resolve("teaching", Some("faculty"), &[]).unwrap();
+        let faculty = cat.resolve("education", Some("faculty"), &[]).unwrap();
         assert_eq!(faculty.may_spawn, ["materials-author"]);
         assert!(r.skills.contains(&"check-citations".into()));
         assert!(r.skills.contains(&"write-gherkin".into()));
@@ -807,7 +912,7 @@ harnesses: {}
     #[test]
     fn resolve_learner_omits_staff_skills() {
         let cat = load_repo();
-        let r = cat.resolve("teaching", Some("learner"), &[]).unwrap();
+        let r = cat.resolve("education", Some("learner"), &[]).unwrap();
         assert!(r.skills.contains(&"lab-tutor".into()));
         assert!(!r.skills.contains(&"delegate".into()));
         assert!(!r.skills.contains(&"write-gherkin".into()));
@@ -825,7 +930,7 @@ harnesses: {}
     #[test]
     fn resolve_default_role() {
         let cat = load_repo();
-        let r = cat.resolve("teaching", None, &[]).unwrap();
+        let r = cat.resolve("education", None, &[]).unwrap();
         assert_eq!(r.role, "instructor");
     }
 
@@ -936,7 +1041,7 @@ harnesses:
     #[test]
     fn resolve_unknown_role() {
         let cat = load_repo();
-        let err = cat.resolve("teaching", Some("dean"), &[]).unwrap_err();
+        let err = cat.resolve("education", Some("dean"), &[]).unwrap_err();
         assert!(err.to_string().contains("unknown role"));
     }
 
@@ -944,7 +1049,7 @@ harnesses:
     fn resolve_explicit_packs() {
         let cat = load_repo();
         let r = cat
-            .resolve("teaching", None, &["shared".into(), "learner".into()])
+            .resolve("education", None, &["shared".into(), "learner".into()])
             .unwrap();
         assert_eq!(r.packages, ["shared", "learner"]);
         assert!(r.role.is_empty());
@@ -956,7 +1061,7 @@ harnesses:
         let cat = load_repo();
         let s = cat.format_list();
         assert!(s.lines().any(|l| l.starts_with("HARNESS")));
-        assert!(s.contains("teaching"));
+        assert!(s.contains("education"));
         assert!(s.contains("product"));
         assert!(s.contains("creative"));
         assert!(s.contains("performance"));
@@ -1008,18 +1113,61 @@ harnesses:
     }
 
     #[test]
-    fn show_teaching_roles() {
+    fn teaching_alias_resolves_to_education() {
         let cat = load_repo();
-        let s = cat.format_show("teaching").unwrap();
+        cat.check_harness_aliases(Path::new(env!("CARGO_MANIFEST_DIR")))
+            .unwrap();
+        let via_alias = cat.resolve("teaching", Some("learner"), &[]).unwrap();
+        let via_name = cat.resolve("education", Some("learner"), &[]).unwrap();
+        assert_eq!(via_alias.harness, "education");
+        assert_eq!(via_name.harness, "education");
+        assert_eq!(via_alias.packages, via_name.packages);
+        assert_eq!(via_alias.skills, via_name.skills);
+        assert_eq!(via_alias.deprecated_harness.as_deref(), Some("teaching"));
+        assert!(via_name.deprecated_harness.is_none());
+        let listed = cat.format_list();
+        assert!(listed.contains("HARNESS_ALIAS"));
+        assert!(listed.contains("teaching"));
+        let shown = cat.format_show("teaching").unwrap();
+        assert!(shown.lines().any(|line| line == "HARNESS=education"));
+        assert!(shown.contains("deprecated"));
+        assert!(shown.contains("HARNESS_ALIAS"));
+    }
+
+    #[test]
+    fn harness_alias_refuses_missing_target_and_shadow_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let kit = dir.path();
+        let missing: Catalog = serde_yaml::from_str(
+            "version: 1\nharness_aliases:\n  teaching:\n    target: education\n    deprecated: true\nharnesses: {}\n",
+        )
+        .unwrap();
+        let err = missing.check_harness_aliases(kit).unwrap_err();
+        assert!(err.to_string().contains("education"), "{err}");
+
+        let ok: Catalog = serde_yaml::from_str(
+            "version: 1\nharness_aliases:\n  teaching:\n    target: education\n    deprecated: true\nharnesses:\n  education:\n    status: active\n    packages: {}\n    roles: {}\n",
+        )
+        .unwrap();
+        ok.check_harness_aliases(kit).unwrap();
+        fs::create_dir_all(kit.join("harnesses/teaching")).unwrap();
+        let shadow = ok.check_harness_aliases(kit).unwrap_err();
+        assert!(shadow.to_string().contains("teaching"), "{shadow}");
+    }
+
+    #[test]
+    fn show_education_roles() {
+        let cat = load_repo();
+        let s = cat.format_show("education").unwrap();
         assert!(s.lines().any(|l| l.starts_with("instructor\t")));
     }
 
     #[test]
     fn show_lists_doc_templates() {
         let cat = load_repo();
-        let teaching = cat.format_show("teaching").unwrap();
-        assert!(teaching.contains("TEMPLATE\tDEST\tPATH"));
-        assert!(teaching.lines().any(|l| l.starts_with("slos\t")));
+        let education = cat.format_show("education").unwrap();
+        assert!(education.contains("TEMPLATE\tDEST\tPATH"));
+        assert!(education.lines().any(|l| l.starts_with("slos\t")));
         let research = cat.format_show("research").unwrap();
         assert!(research.lines().any(|l| l.starts_with("aims\t")));
         assert!(research.lines().any(|l| l.starts_with("protocol\t")));
@@ -1030,9 +1178,9 @@ harnesses:
     #[test]
     fn doc_template_lookup() {
         let cat = load_repo();
-        let slos = cat.doc_template("teaching", "slos").unwrap();
+        let slos = cat.doc_template("education", "slos").unwrap();
         assert_eq!(slos.dest_name(), "slos.md");
-        let err = cat.doc_template("teaching", "aims").unwrap_err();
+        let err = cat.doc_template("education", "aims").unwrap_err();
         assert!(err.to_string().contains("unknown doc template"));
     }
 }

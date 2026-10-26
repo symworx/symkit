@@ -76,7 +76,7 @@ path. A compromised GitHub token or Actions workflow is the same
 and checksums make substitution harder to hide. We do not ship a
 `curl | sh` installer.
 
-## Teaching course (usual)
+## Education course (usual)
 
 A full course repository (layout, identity, optional uv/Containerfile) is
 [symworx/symcourse](https://github.com/symworx/symcourse). `symcourse new` runs
@@ -92,16 +92,16 @@ this installer for you:
 That is equivalent to, on an existing course tree (no `--scaffold`):
 
 ```bash
-symkit install /path/to/course --harness teaching --role instructor --docs slos --yes
+symkit install /path/to/course --harness education --role instructor --docs slos --yes
 ```
 
 `--docs slos` copies a faculty-owned SLO blank into `docs/` (or
 `documents/` if that is the only docs tree) **only if the file is
 missing**. `symcourse new` already writes `docs/slos.md` with course
 code and title filled in; nested install will skip it. Use `--force` to
-replace a kit-only blank, not a filled course file. `symkit show teaching` and
-`symkit show research` list template ids (teaching: `slos`; research:
-`aims`, `protocol`).
+replace a kit-only blank, not a filled course file. `symkit show education` and
+`symkit show research` list template ids (education: `slos`; research:
+`aims`, `protocol`). `teaching` is a deprecated alias for `education`.
 
 ## New workspace (kit-only stubs, or other harnesses)
 
@@ -109,7 +109,7 @@ Folder stubs plus agent packs when you are **not** using symcourse:
 
 ```bash
 symkit init /path/to/new-course \
-  --harness teaching --role instructor --scaffold --docs slos --yes
+  --harness education --role instructor --scaffold --docs slos --yes
 symkit init /path/to/new-study \
   --harness research --role researcher --scaffold --docs aims --yes
 ```
@@ -120,7 +120,7 @@ Do not pass `--scaffold` on a tree `symcourse` already created.
 
 `--migration-docs` creates `migration-docs/` for legacy PDF/Word import
 (instructor skill `migrate-course`). Dumps are gitignored. On a TTY,
-teaching `init` asks unless you passed `--yes` or `--no-migration-docs`.
+education `init` asks unless you passed `--yes` or `--no-migration-docs`.
 
 ## Existing repo
 
@@ -141,7 +141,7 @@ pointer is appended to `AGENTS.md`; existing `AGENTS.md` is never replaced.
 Canonical trees also include `.agents/`. Adapters are mirrors:
 
 ```bash
-symkit install DIR --harness teaching --role instructor --adapters all
+symkit install DIR --harness education --role instructor --adapters all
 symkit adapt DIR --adapters none   # does not delete existing vendor trees
 ```
 
@@ -153,7 +153,7 @@ Default: `grok` only.
 - Do not commit `.agents/`, `.grok/`, `.claude/`, `.codex/`, or `.symkit/`.
 - Do not push staff/instructor/ta packs to a student-visible branch.
 - Do not pass `--scaffold` on a tree created by `symcourse`.
-- Do not install teaching `--role instructor` and then `--role learner` on
+- Do not install education `--role instructor` and then `--role learner` on
   the same tree (learner prune strips instructor agents).
 - Pack `docs/` (literacy, AI policy) do not overwrite existing files unless
   `--force`. Re-install still refreshes `.agents/`.

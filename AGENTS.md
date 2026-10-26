@@ -25,7 +25,7 @@ symkit is a **content + installer** kit, not an application server.
 
 ## Development focus
 
-Keep the installer catalog-driven and the teaching/research/ai harnesses
+Keep the installer catalog-driven and the education/research/ai harnesses
 honest about what they install. Course **runtime** and identity (uv,
 Containerfile, org overlays) belong in `csymd/symcourse`, not new
 `symkit` flags. `--scaffold` is folder stubs only.
@@ -66,7 +66,7 @@ cargo +nightly fmt
 cargo test
 cargo clippy -- -D warnings
 ./cli/symkit list
-./cli/symkit show teaching
+./cli/symkit show education
 ./tests/smoke.sh
 ```
 
@@ -107,7 +107,7 @@ Requires rustup with **stable** (build/clippy/test) and **nightly**
 
 ## Content rules (harness packages)
 
-- Teaching faculty packs (`staff`, `instructor`, `ta`) are **not**
+- Education faculty packs (`staff`, `instructor`, `ta`) are **not**
   student-safe. Do not weaken the warnings.
 - Learner literacy is a separate pack. Do not stack full faculty + full
   learner trees unless the human passed `--also` / `--pack`.

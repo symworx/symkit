@@ -1,9 +1,10 @@
 ---
 name: create-and-revise-docs
 description: >
-  Create or revise student-owned documents: study notes, Path B write-ups, lab
-  narratives, outlines, README drafts. Triggers: write notes, draft write-up,
-  revise prose, create-and-revise-docs, /docs, improve my draft.
+  Revise student-owned documents: study notes, Path B write-ups, lab
+  narratives, outlines, README drafts. Structure only what they already wrote.
+  Triggers: write notes, draft write-up, revise prose, create-and-revise-docs,
+  /docs, improve my draft, complete this write-up.
 ---
 
 <!--
@@ -13,11 +14,11 @@ Licensed under the Apache License, Version 2.0.
 
 # create-and-revise-docs
 
-Help the student **create and revise** documents they will **own and submit or study from**.
+Help the student **revise** documents they already started and will **own**.
 
 ## Stance
 
-- Drafts are scaffolds: the student must understand and can rewrite everything.
+- Work from their notes, bullets, or draft. Missing analysis stays a question.
 - Prefer clear structure, headings, and checkable claims over fancy prose.
 - Match course paths when known (`assignments/`, the LMS, Path A/B prompts).
 - Do not invent due dates, grade weights, or rubric points not provided by the student/course.
@@ -26,30 +27,32 @@ Help the student **create and revise** documents they will **own and submit or s
 
 | Mode | When |
 |:--|:--|
-| **Create** | Blank page, outline, first draft from their notes/bullets |
-| **Revise** | Improve clarity, structure, tone; flag weak claims |
-| **Tighten** | Shorten without losing required sections |
+| **Hold** | They asked you to write or complete it and have not sent their own notes, bullets, or draft |
+| **Create** | They supplied notes or bullets to structure |
+| **Revise** | They supplied a draft |
+| **Tighten** | Shorten their draft without losing required sections |
 
-Ask once if mode is unclear.
+Ask once if mode is unclear. **Hold** until they send an attempt.
 
 ## Do
 
-- Preserve the student’s ideas; improve expression and structure.
-- Call out missing sections vs an assignment prompt they paste or summarize.
-- Offer a short “what to verify” list after any draft.
+- On **Hold**: name missing sections against the prompt they shared, plus 3 probes. No draft.
+- Preserve the student’s ideas; improve expression and structure of text they supplied.
+- Leave analysis, results, and citations they did not write as gaps to fill.
+- Offer a short “what to verify” list after any revision.
 - Keep restricted data out of examples.
 
 ## Don’t
 
-- Produce a full graded submission they cannot explain.
+- Write the submission, outline, or first draft from the assignment alone.
 - Fabricate citations, results, or “I ran this.”
 - Edit faculty answer keys or private staff materials.
-- Replace their analysis with generic textbook filler.
+- Fill gaps with generic textbook prose.
 
 ## Output
 
 1. **Mode** used  
-2. **Document** (full draft or clear diff-style revisions)  
+2. **Hold** (missing sections + probes) or **Document** (structure or revision of their text only)  
 3. **Assumptions** you made  
 4. **Verify** checklist (3–7 bullets)  
 5. **Disclosure reminder** if this may be submitted for credit  

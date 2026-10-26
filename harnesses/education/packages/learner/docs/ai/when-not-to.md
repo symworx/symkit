@@ -42,4 +42,4 @@ Ask **before** the deadline.
 
 ---
 
-*Part of the teaching learner pack.*
+*Part of the education learner pack.*

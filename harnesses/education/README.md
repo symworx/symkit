@@ -1,4 +1,4 @@
-# Teaching harness
+# Education harness
 
 Course materials, staff agents, and optional learner literacy.
 
@@ -13,7 +13,7 @@ Course materials, staff agents, and optional learner literacy.
 
 This harness installs **agent packs**. Course *runtime* (uv, Containerfile,
 org identity) is [symworx/symcourse](https://github.com/symworx/symcourse).
-The usual teaching path is `symcourse new`, which calls this installer
+The usual course path is `symcourse new`, which calls this installer
 (pass `--symkit` if the binary is not on `PATH`).
 
 ```bash
@@ -21,10 +21,10 @@ The usual teaching path is `symcourse new`, which calls this installer
 #   ./cli/symcourse new … --symkit /path/to/this/checkout
 
 # Existing course tree (no --scaffold):
-./cli/symkit install /path/to/course --harness teaching --role instructor --docs slos
+./cli/symkit install /path/to/course --harness education --role instructor --docs slos
 
 # Kit-only folder stubs (assignments/, lectures/, data/ — not a full course image):
-./cli/symkit init /path/to/new-course --harness teaching --role instructor --scaffold --docs slos
+./cli/symkit init /path/to/new-course --harness education --role instructor --scaffold --docs slos
 ```
 
 Do not pass `--scaffold` on a tree `symcourse` already created. Do not install
@@ -36,17 +36,18 @@ only if it is missing (`--force` to replace). On a **symcourse** tree the
 scaffold already wrote `docs/slos.md` with course code and title; nested
 install skips it. That file is the published outcome list (`slos-as-truth`).
 Pack `docs/` (AI policy, literacy) are the same: skip existing files unless
-`--force`. `symkit show teaching` lists template ids.
+`--force`. `symkit show education` lists template ids.
+`teaching` is a deprecated alias for this harness.
 
 Do not commit `staff`, `instructor`, or `ta` packs into student-visible trees.
 Learner docs under `docs/` are safe to commit; `.agents/` usually is not.
 See the installed `course-materials.md` rule for the commit list.
 
-`--migration-docs` (or the teaching `init` prompt) creates `migration-docs/`
+`--migration-docs` (or the education `init` prompt) creates `migration-docs/`
 for PDF/Word dumps. Convert with the instructor skill `migrate-course`.
 Source files stay gitignored.
 
-Course-specific extras: copy `examples/teaching-overlay/` into
-`harnesses/teaching/packages/<id>/`, register it in `catalog.yaml`, then
+Course-specific extras: copy `examples/education-overlay/` into
+`harnesses/education/packages/<id>/`, register it in `catalog.yaml`, then
 `--also <id>`. Keep overlays short. Overlay packs are not first-class local
 paths yet — they must live in the catalog.

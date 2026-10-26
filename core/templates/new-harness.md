@@ -1,6 +1,6 @@
 # New harness
 
-1. Copy `examples/teaching-overlay/` or an existing `harnesses/<name>/` tree.
+1. Copy `examples/education-overlay/` or an existing `harnesses/<name>/` tree.
 2. Add packages under `harnesses/<name>/packages/<pkg>/` with any of:
    - `AGENTS.md` (installed as `AGENTS-SYMKIT.md`; a pointer is appended to the target `AGENTS.md`)
    - `.agents/rules/`, `.agents/agents/`
