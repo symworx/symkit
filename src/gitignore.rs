@@ -48,6 +48,44 @@ pub fn ensure_agent_gitignore(target: &Path) -> Result<String> {
     Ok(missing.join(" "))
 }
 
+/// Drop the symkit agent-tree block. Leave the rest of `.gitignore`.
+/// Deletes the file when that block was the only content.
+pub fn remove_agent_gitignore_block(target: &Path) -> Result<bool> {
+    let gi = target.join(".gitignore");
+    if !gi.is_file() {
+        return Ok(false);
+    }
+    let existing = fs::read_to_string(&gi)?;
+    let Some(stripped) = strip_marker_block(&existing, MARKER_BEGIN, MARKER_END) else {
+        return Ok(false);
+    };
+    if stripped.trim().is_empty() {
+        fs::remove_file(&gi)?;
+        println!("  removed {}", gi.display());
+    } else {
+        fs::write(&gi, stripped)?;
+        println!("  gitignore: removed symkit agent block");
+    }
+    Ok(true)
+}
+
+fn strip_marker_block(text: &str, begin: &str, end: &str) -> Option<String> {
+    let start = text.find(begin)?;
+    let after = start + begin.len();
+    let end_at = text[after..].find(end)? + after + end.len();
+    let mut out = String::new();
+    out.push_str(text[..start].trim_end_matches('\n'));
+    let rest = text[end_at..].trim_start_matches('\n');
+    if !out.is_empty() && !rest.is_empty() {
+        out.push_str("\n\n");
+    }
+    out.push_str(rest);
+    if !out.is_empty() && !out.ends_with('\n') {
+        out.push('\n');
+    }
+    Some(out)
+}
+
 const MIG_BEGIN: &str = "# BEGIN symkit migration-docs (do not commit dumps)";
 const MIG_END: &str = "# END symkit migration-docs";
 const MIG_PATTERNS: &[&str] = &["migration-docs/**", "!migration-docs/README.md"];
@@ -105,5 +143,17 @@ mod tests {
         ensure_migration_gitignore(dir.path()).unwrap();
         let again = fs::read_to_string(dir.path().join(".gitignore")).unwrap();
         assert_eq!(again.matches("# BEGIN symkit migration-docs").count(), 1);
+    }
+
+    #[test]
+    fn remove_agent_block_keeps_other_lines() {
+        let dir = tempdir().unwrap();
+        fs::write(dir.path().join(".gitignore"), "data/private/\n").unwrap();
+        ensure_agent_gitignore(dir.path()).unwrap();
+        assert!(remove_agent_gitignore_block(dir.path()).unwrap());
+        let text = fs::read_to_string(dir.path().join(".gitignore")).unwrap();
+        assert!(text.contains("data/private/"));
+        assert!(!text.contains("BEGIN symkit agent trees"));
+        assert!(!remove_agent_gitignore_block(dir.path()).unwrap());
     }
 }

@@ -147,6 +147,40 @@ symkit adapt DIR --adapters none   # does not delete existing vendor trees
 
 Default: `grok` only.
 
+## User home (`--root`)
+
+Install the same harness into your home directory so a new Grok, Claude, or
+Codex session loads it without a per-repo install:
+
+```bash
+symkit install --root --harness engineering --role engineer --yes
+```
+
+Adapters default to `all` (`--adapters` still wins). Files land in the same
+relative places a project install uses, with `$HOME` as the target:
+`~/.agents/`, `~/.grok/`, `~/.claude/`, and `~/.codex/`. The harness overlay
+is `~/.grok/rules/AGENTS-SYMKIT.md`, `~/.claude/CLAUDE.md`, and
+`~/.codex/AGENTS.md`. This command does not write `~/AGENTS.md` or
+`~/.gitignore`.
+
+`--scaffold`, `--docs`, and `--migration-docs` stay on project installs.
+`symkit init` does not take `--root`. A skill you already had under
+`~/.grok/skills/` is left in place unless an earlier `--root` install
+recorded that name. See [root-install.md](root-install.md).
+
+## Uninstall
+
+```bash
+symkit uninstall /path/to/repo --yes
+symkit uninstall --root --yes
+```
+
+Uninstall reads `.symkit/state.yaml` and removes the skills, agents, and
+rules that install recorded, plus the harness pointer and `AGENTS-SYMKIT.md`.
+Scaffold folders, `--docs` files, and `migration-docs/` stay. A personal
+skill that was never recorded stays, including under `~/.grok/skills/` on
+a home install. `--dry-run` prints the plan and removes nothing.
+
 ## What not to do
 
 - Do not run init/install against the symkit repo itself.

@@ -51,11 +51,19 @@ pub struct InstallRequest {
     pub docs: Vec<String>,
     pub docs_root: Option<String>,
     pub migration_docs: bool,
+    /// Install into the user home. Skips project-only files.
+    pub root: bool,
 }
 
-pub fn preview(req: &InstallRequest, docs_root: &str) {
+pub fn preview(req: &InstallRequest, docs_root: &str, root_notes: &[String]) {
     println!("Kit:      {}", req.kit_root.display());
     println!("Target:   {}", req.target.display());
+    if req.root {
+        println!("Mode:     root (user home)");
+        for note in root_notes {
+            println!("Note:     {note}");
+        }
+    }
     println!("Harness:  {}", req.resolved.harness);
     if let Some(alias) = &req.resolved.deprecated_harness {
         println!(
@@ -183,7 +191,18 @@ pub fn run(req: &InstallRequest) -> Result<()> {
         }
         resolve_docs_root(&req.target, req.docs_root.as_deref(), req.yes)?
     };
-    preview(req, &docs_root);
+    let planned = planned_managed_set(req)?;
+    let previous = if req.root {
+        read_managed_set(&req.target, &req.catalog)
+    } else {
+        ManagedSet::default()
+    };
+    let root_notes = if req.root {
+        unmanaged_collisions(req, &planned, &previous)
+    } else {
+        Vec::new()
+    };
+    preview(req, &docs_root, &root_notes);
     confirm(req)?;
 
     println!();
@@ -193,21 +212,30 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     }
 
     if req.prune {
-        let mut prune = req.resolved.prune.clone();
-        prune.skills = derived_skill_prune(
-            &req.kit_root,
-            &req.resolved.library_skills,
-            &req.resolved.skills,
-            prune.skills,
-        )?;
-        for name in req.catalog.library.skill_aliases.keys() {
-            if !prune.skills.iter().any(|existing| existing == name) {
-                prune.skills.push(name.clone());
+        if req.root {
+            let prune = PruneSpec {
+                skills: names_to_prune(&previous.skills, &planned.skills),
+                agents: names_to_prune(&previous.agents, &planned.agents),
+                rules: names_to_prune(&previous.rules, &planned.rules),
+            };
+            prune_for_resolve(&req.target, &prune)?;
+        } else {
+            let mut prune = req.resolved.prune.clone();
+            prune.skills = derived_skill_prune(
+                &req.kit_root,
+                &req.resolved.library_skills,
+                &req.resolved.skills,
+                prune.skills,
+            )?;
+            for name in req.catalog.library.skill_aliases.keys() {
+                if !prune.skills.iter().any(|existing| existing == name) {
+                    prune.skills.push(name.clone());
+                }
             }
+            prune.skills.sort();
+            prune.skills.dedup();
+            prune_for_resolve(&req.target, &prune)?;
         }
-        prune.skills.sort();
-        prune.skills.dedup();
-        prune_for_resolve(&req.target, &prune)?;
     }
 
     if !req.resolved.core_rules.is_empty() {
@@ -222,17 +250,22 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     install_library_skills(req)?;
 
     let mut wrote_overlay = false;
+    let mut last_overlay: Option<PathBuf> = None;
     for pkg in &req.resolved.packages {
-        wrote_overlay |= install_package(
+        if let Some(overlay_src) = install_package(
             &req.kit_root,
             &req.target,
             &req.catalog,
             &req.resolved.harness,
             pkg,
             req.force,
-        )?;
+            req.root,
+        )? {
+            last_overlay = Some(overlay_src);
+            wrote_overlay = true;
+        }
     }
-    if wrote_overlay {
+    if wrote_overlay && !req.root {
         ensure_agents_md_pointer(
             &req.target,
             req.catalog.canonical.agents_md(),
@@ -246,11 +279,20 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     }
 
     println!();
-    write_selected_adapters(&req.target, &req.adapters)?;
+    write_selected_adapters(&req.target, &req.adapters, req.root)?;
 
-    println!();
-    println!("Ensuring agent trees are gitignored...");
-    ensure_agent_gitignore(&req.target)?;
+    if req.root {
+        if let Some(src) = &last_overlay {
+            println!();
+            place_root_overlay(req, src)?;
+        }
+    }
+
+    if !req.root {
+        println!();
+        println!("Ensuring agent trees are gitignored...");
+        ensure_agent_gitignore(&req.target)?;
+    }
 
     if req.migration_docs {
         println!();
@@ -259,7 +301,7 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     }
 
     println!();
-    write_install_state(&req.target, &req.catalog, &req.resolved, &req.adapters)?;
+    write_install_state(&req.target, &req.catalog, &req.resolved, &req.adapters, Some(&planned))?;
 
     if !req.resolved.private.is_empty() {
         println!();
@@ -267,8 +309,12 @@ pub fn run(req: &InstallRequest) -> Result<()> {
     }
 
     println!();
-    println!("Done. Review changes in the target (not committed).");
-    println!("  cd \"{}\" && git status", req.target.display());
+    if req.root {
+        println!("Done. Open a new Grok, Claude, or Codex session to load the harness.");
+    } else {
+        println!("Done. Review changes in the target (not committed).");
+        println!("  cd \"{}\" && git status", req.target.display());
+    }
     Ok(())
 }
 
@@ -325,7 +371,8 @@ fn install_package(
     harness: &str,
     name: &str,
     force: bool,
-) -> Result<bool> {
+    root: bool,
+) -> Result<Option<PathBuf>> {
     let rel = catalog.package_path(harness, name)?;
     let src = kit.join(&rel);
     if !src.is_dir() {
@@ -336,14 +383,19 @@ fn install_package(
     if !safe {
         println!("  note: '{name}' is staff-local — do not commit to student-facing trees");
     }
-    let mut wrote_overlay = false;
     let agents_md = src.join("AGENTS.md");
-    if agents_md.is_file() {
-        let overlay = catalog.canonical.agents_overlay();
-        fs::copy(&agents_md, target.join(overlay))?;
-        println!("  {overlay} ← {}", agents_md.display());
-        wrote_overlay = true;
-    }
+    let overlay_src = if agents_md.is_file() {
+        if root {
+            println!("  harness overlay ← {}", agents_md.display());
+        } else {
+            let overlay = catalog.canonical.agents_overlay();
+            fs::copy(&agents_md, target.join(overlay))?;
+            println!("  {overlay} ← {}", agents_md.display());
+        }
+        Some(agents_md)
+    } else {
+        None
+    };
     merge_tree(
         &src.join(".agents").join("rules"),
         &target.join(".agents").join("rules"),
@@ -357,7 +409,7 @@ fn install_package(
         &target.join(".agents").join("agents"),
     )?;
     let docs = src.join("docs");
-    if docs.is_dir() {
+    if docs.is_dir() && !root {
         // Committed course docs (AI policy, literacy) skip if present, like
         // --docs and --scaffold. .agents/ still overwrites: the kit owns those.
         let copied = merge_tree_safe(&docs, &target.join("docs"), force)?;
@@ -368,7 +420,7 @@ fn install_package(
             }
         }
     }
-    Ok(wrote_overlay)
+    Ok(overlay_src)
 }
 
 const AGENTS_POINTER_BEGIN: &str = "<!-- BEGIN symkit harness (do not edit this block) -->";
@@ -507,17 +559,19 @@ fn prune_named(target: &Path, kind: &str, name: &str, header_done: bool) -> Resu
     Ok(hit)
 }
 
-fn write_install_state(target: &Path, catalog: &Catalog, resolved: &Resolve, adapters: &[String]) -> Result<()> {
-    let rel = if catalog.canonical.state.is_empty() {
-        ".symkit/state.yaml".to_string()
-    } else {
-        catalog.canonical.state.clone()
-    };
+fn write_install_state(
+    target: &Path,
+    catalog: &Catalog,
+    resolved: &Resolve,
+    adapters: &[String],
+    managed: Option<&ManagedSet>,
+) -> Result<()> {
+    let rel = state_rel(catalog);
     let path = target.join(&rel);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    let body = format!(
+    let mut body = format!(
         "harness: {}\nrole: {}\npackages: [{}]\nskills: [{}]\nadapters: [{}]\n",
         resolved.harness,
         resolved.role,
@@ -525,18 +579,29 @@ fn write_install_state(target: &Path, catalog: &Catalog, resolved: &Resolve, ada
         resolved.skills.join(" "),
         adapters.join(" ")
     );
+    if let Some(managed) = managed {
+        body.push_str(&format!(
+            "managed_skills: [{}]\nmanaged_agents: [{}]\nmanaged_rules: [{}]\n",
+            managed.skills.join(" "),
+            managed.agents.join(" "),
+            managed.rules.join(" ")
+        ));
+    }
     fs::write(&path, body)?;
     println!("  state → {rel}");
     Ok(())
 }
 
-fn read_existing_harness(target: &Path, catalog: &Catalog) -> Option<String> {
-    let rel = if catalog.canonical.state.is_empty() {
+fn state_rel(catalog: &Catalog) -> String {
+    if catalog.canonical.state.is_empty() {
         ".symkit/state.yaml".to_string()
     } else {
         catalog.canonical.state.clone()
-    };
-    let text = fs::read_to_string(target.join(rel)).ok()?;
+    }
+}
+
+fn read_existing_harness(target: &Path, catalog: &Catalog) -> Option<String> {
+    let text = fs::read_to_string(target.join(state_rel(catalog))).ok()?;
     for line in text.lines() {
         if let Some(rest) = line.strip_prefix("harness:") {
             let v = rest.trim();
@@ -654,8 +719,193 @@ fn install_doc_templates(req: &InstallRequest, docs_root: &str) -> Result<()> {
 
 pub fn adapt_only(target: &Path, adapters: &[String]) -> Result<()> {
     println!("Target:   {}", target.display());
-    write_selected_adapters(target, adapters)?;
+    write_selected_adapters(target, adapters, false)?;
     ensure_agent_gitignore(target)?;
+    Ok(())
+}
+
+#[derive(Debug, Clone, Default)]
+struct ManagedSet {
+    skills: Vec<String>,
+    agents: Vec<String>,
+    rules: Vec<String>,
+}
+
+fn names_to_prune(previous: &[String], planned: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = previous
+        .iter()
+        .filter(|name| !planned.iter().any(|kept| kept == *name))
+        .cloned()
+        .collect();
+    out.sort();
+    out.dedup();
+    out
+}
+
+fn planned_managed_set(req: &InstallRequest) -> Result<ManagedSet> {
+    let mut skills = req.resolved.skills.clone();
+    let mut agents = Vec::new();
+    let mut rules = Vec::new();
+    if !req.resolved.core_rules.is_empty() {
+        collect_md_stems(&req.kit_root.join(&req.resolved.core_rules), &mut rules);
+    }
+    for pkg in &req.resolved.packages {
+        let rel = req.catalog.package_path(&req.resolved.harness, pkg)?;
+        let src = req.kit_root.join(&rel).join(".agents");
+        collect_dir_names(&src.join("skills"), &mut skills);
+        collect_md_stems(&src.join("agents"), &mut agents);
+        collect_md_stems(&src.join("rules"), &mut rules);
+    }
+    sort_dedup(&mut skills);
+    sort_dedup(&mut agents);
+    sort_dedup(&mut rules);
+    Ok(ManagedSet { skills, agents, rules })
+}
+
+fn sort_dedup(names: &mut Vec<String>) {
+    names.sort();
+    names.dedup();
+}
+
+fn collect_dir_names(dir: &Path, out: &mut Vec<String>) {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        if entry.file_type().map(|kind| kind.is_dir()).unwrap_or(false) {
+            out.push(entry.file_name().to_string_lossy().into_owned());
+        }
+    }
+}
+
+fn collect_md_stems(dir: &Path, out: &mut Vec<String>) {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        let Some(stem) = name.strip_suffix(".md") else {
+            continue;
+        };
+        if stem.is_empty() || stem.eq_ignore_ascii_case("readme") {
+            continue;
+        }
+        out.push(stem.to_string());
+    }
+}
+
+fn read_managed_set(target: &Path, catalog: &Catalog) -> ManagedSet {
+    let text = fs::read_to_string(target.join(state_rel(catalog))).unwrap_or_default();
+    ManagedSet {
+        skills: parse_bracket_list(&text, "managed_skills:"),
+        agents: parse_bracket_list(&text, "managed_agents:"),
+        rules: parse_bracket_list(&text, "managed_rules:"),
+    }
+}
+
+fn parse_bracket_list(text: &str, key: &str) -> Vec<String> {
+    for line in text.lines() {
+        let Some(rest) = line.strip_prefix(key) else {
+            continue;
+        };
+        let rest = rest.trim().trim_start_matches('[').trim_end_matches(']');
+        return rest
+            .split_whitespace()
+            .map(str::to_string)
+            .filter(|name| !name.is_empty())
+            .collect();
+    }
+    Vec::new()
+}
+
+fn unmanaged_collisions(req: &InstallRequest, planned: &ManagedSet, previous: &ManagedSet) -> Vec<String> {
+    let mut notes = Vec::new();
+    push_collisions(req, "skills", &planned.skills, &previous.skills, true, &mut notes);
+    push_collisions(req, "agents", &planned.agents, &previous.agents, false, &mut notes);
+    push_collisions(req, "rules", &planned.rules, &previous.rules, false, &mut notes);
+    if req.adapters.iter().any(|name| name == "codex") {
+        let path = req.target.join(".codex").join("AGENTS.override.md");
+        if path.is_file() {
+            notes.push(format!(
+                "{} exists; Codex reads it instead of AGENTS.md",
+                path.display()
+            ));
+        }
+    }
+    notes
+}
+
+fn push_collisions(
+    req: &InstallRequest,
+    kind: &str,
+    planned: &[String],
+    previous: &[String],
+    is_dir: bool,
+    notes: &mut Vec<String>,
+) {
+    for name in planned {
+        if previous.iter().any(|kept| kept == name) {
+            continue;
+        }
+        for vendor in vendor_roots(kind, &req.adapters) {
+            let path = match kind {
+                "skills" => req.target.join(vendor).join("skills").join(name),
+                "agents" => req.target.join(vendor).join("agents").join(format!("{name}.md")),
+                "rules" => req.target.join(vendor).join("rules").join(format!("{name}.md")),
+                _ => continue,
+            };
+            let exists = if is_dir { path.is_dir() } else { path.is_file() };
+            if exists {
+                notes.push(format!(
+                    "overwrite {} (not previously managed by symkit)",
+                    path.display()
+                ));
+            }
+        }
+    }
+}
+
+fn vendor_roots<'a>(kind: &str, adapters: &'a [String]) -> Vec<&'a str> {
+    let mut roots = vec![".agents"];
+    if adapters.iter().any(|name| name == "grok") {
+        roots.push(".grok");
+    }
+    if adapters.iter().any(|name| name == "claude") {
+        roots.push(".claude");
+    }
+    if kind == "skills" && adapters.iter().any(|name| name == "codex") {
+        roots.push(".codex");
+    }
+    roots
+}
+
+fn place_root_overlay(req: &InstallRequest, src: &Path) -> Result<()> {
+    let name = req.catalog.canonical.agents_overlay();
+    if req.adapters.iter().any(|adapter| adapter == "grok") {
+        let dest = req.target.join(".grok").join("rules").join(name);
+        copy_file(src, &dest)?;
+        println!("  .grok/rules/{name} ← harness overlay");
+    }
+    if req.adapters.iter().any(|adapter| adapter == "claude") {
+        let dest = req.target.join(".claude").join(name);
+        copy_file(src, &dest)?;
+        println!("  .claude/{name} ← harness overlay");
+    }
+    if req.adapters.iter().any(|adapter| adapter == "codex") {
+        let dest = req.target.join(".codex").join(name);
+        copy_file(src, &dest)?;
+        println!("  .codex/{name} ← harness overlay");
+    }
+    crate::adapters::write_root_instruction_pointers(&req.target, &req.adapters, name)?;
+    Ok(())
+}
+
+fn copy_file(src: &Path, dest: &Path) -> Result<()> {
+    if let Some(parent) = dest.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::copy(src, dest)?;
     Ok(())
 }
 
@@ -733,5 +983,43 @@ mod tests {
         assert!(validate_rel_path("../docs").is_err());
         assert!(validate_rel_path("/tmp/docs").is_err());
         assert!(validate_rel_path("").is_err());
+    }
+
+    #[test]
+    fn managed_difference_drops_kept_names() {
+        let previous = vec!["old-skill".into(), "write-tests".into()];
+        let planned = vec!["write-tests".into(), "write-docs".into()];
+        assert_eq!(names_to_prune(&previous, &planned), vec!["old-skill".to_string()]);
+    }
+
+    #[test]
+    fn parse_managed_list_reads_brackets() {
+        let text = "harness: engineering\nmanaged_skills: [old-skill write-tests]\n";
+        assert_eq!(
+            parse_bracket_list(text, "managed_skills:"),
+            vec!["old-skill".to_string(), "write-tests".to_string()]
+        );
+        assert!(parse_bracket_list(text, "managed_agents:").is_empty());
+    }
+
+    #[test]
+    fn root_prune_removes_managed_skill_and_leaves_unmanaged() {
+        let dir = tempdir().unwrap();
+        fs::create_dir_all(dir.path().join(".grok/skills/qc-things")).unwrap();
+        fs::write(dir.path().join(".grok/skills/qc-things/SKILL.md"), "keep\n").unwrap();
+        fs::create_dir_all(dir.path().join(".agents/skills/old-skill")).unwrap();
+        fs::write(dir.path().join(".agents/skills/old-skill/SKILL.md"), "old\n").unwrap();
+        fs::create_dir_all(dir.path().join(".grok/skills/old-skill")).unwrap();
+        fs::write(dir.path().join(".grok/skills/old-skill/SKILL.md"), "old\n").unwrap();
+
+        let prune = PruneSpec {
+            skills: names_to_prune(&["old-skill".into()], &[]),
+            ..PruneSpec::default()
+        };
+        prune_for_resolve(dir.path(), &prune).unwrap();
+
+        assert!(dir.path().join(".grok/skills/qc-things/SKILL.md").is_file());
+        assert!(!dir.path().join(".grok/skills/old-skill").exists());
+        assert!(!dir.path().join(".agents/skills/old-skill").exists());
     }
 }

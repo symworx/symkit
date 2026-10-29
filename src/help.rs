@@ -20,10 +20,14 @@ EXAMPLES
   symkit show education
   symkit init ~/course --harness education --role instructor --scaffold --docs slos
   symkit install ~/study --harness research --role researcher --docs aims --docs protocol
+  symkit install --root --harness engineering --role engineer
+  symkit uninstall --root
+  symkit uninstall ~/study
 
 WRITES   AGENTS-SYMKIT.md (harness, last pack wins), AGENTS.md pointer
          (never replaces existing), .agents/, pack docs/, vendor adapters
          (default: grok), additive .gitignore, .symkit/state.yaml
+ROOT     install --root   same packs into $HOME (.grok .claude .agents .codex)
 SKIPS    git commit, network, installing into this kit repo
 
   Full flow:  symkit guide
@@ -63,10 +67,15 @@ PRIMARY FLOW
   symkit show <harness>               # packs, roles, skills, may_spawn, aliases
   symkit init <dir> --harness … --role … [--scaffold]
   symkit install <dir> --harness … --role …
+  symkit install --root --harness … --role …
+  symkit uninstall <dir> | symkit uninstall --root
 
   init     creates the directory if needed; asks on a TTY for missing
            target / harness / role / scaffold.
   install  requires an existing directory and --harness.
+           --root installs into $HOME (no directory argument).
+           That mode defaults adapters to all and writes ~/.grok,
+           ~/.claude, ~/.agents, and ~/.codex.
 
   Preview always prints. Confirm, or pass --yes. --dry-run exits after
   the preview. --force overwrites existing scaffold files and --docs copies.

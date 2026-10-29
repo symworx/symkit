@@ -9,3 +9,4 @@ pub mod gitignore;
 pub mod help;
 pub mod install;
 pub mod kit;
+pub mod uninstall;

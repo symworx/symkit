@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 use std::{
+    env,
     io::{
         self,
         IsTerminal,
@@ -35,6 +36,7 @@ use symkit::{
         find_kit_root,
         is_kit_root,
     },
+    uninstall,
 };
 
 #[derive(Parser)]
@@ -66,9 +68,14 @@ enum Command {
     Init(WorkArgs),
     /// Install packs into an existing repo
     #[command(
-        long_about = "Install a harness into an existing directory. The target must already exist.\nPass --scaffold only if you also want workspace stubs.\nPass --docs <id> to copy a catalogued blank into docs/ or documents/ (no overwrite unless --force)."
+        long_about = "Install a harness into an existing directory. The target must already exist.\nPass --scaffold only if you also want workspace stubs.\nPass --docs <id> to copy a catalogued blank into docs/ or documents/ (no overwrite unless --force).\nPass --root instead of a directory to install into $HOME for every Grok, Claude, and Codex session."
     )]
     Install(WorkArgs),
+    /// Remove a symkit install recorded in .symkit/state.yaml
+    #[command(
+        long_about = "Remove the harness symkit recorded in .symkit/state.yaml.\nManaged skills, agents, and rules are deleted. Other files stay.\nPass --root to uninstall the home install. Scaffold, docs, and migration-docs are left in place."
+    )]
+    Uninstall(UninstallArgs),
     /// Rewrite vendor adapters only
     Adapt {
         /// Target directory (already installed)
@@ -88,9 +95,27 @@ enum Command {
 }
 
 #[derive(Args, Default)]
+struct UninstallArgs {
+    /// Target directory
+    target: Option<PathBuf>,
+    /// Uninstall the home install ($HOME)
+    #[arg(long)]
+    root: bool,
+    /// Remove without prompting
+    #[arg(long = "yes", short = 'y')]
+    yes: bool,
+    /// Print the plan and exit
+    #[arg(long)]
+    dry_run: bool,
+}
+
+#[derive(Args, Default)]
 struct WorkArgs {
     /// Target directory
     target: Option<PathBuf>,
+    /// Install into $HOME so Grok, Claude, and Codex load the harness in every session
+    #[arg(long)]
+    root: bool,
     /// Harness id (`symkit list`)
     #[arg(long)]
     harness: Option<String>,
@@ -182,6 +207,7 @@ fn run() -> Result<()> {
         }
         Some(Command::Init(args)) => cmd_init(&kit_root, &catalog, args),
         Some(Command::Install(args)) => cmd_install(&kit_root, &catalog, args),
+        Some(Command::Uninstall(args)) => cmd_uninstall(&catalog, args),
         Some(Command::Adapt {
             target,
             adapters,
@@ -196,16 +222,63 @@ fn run() -> Result<()> {
 }
 
 fn cmd_install(kit_root: &Path, catalog: &Catalog, args: WorkArgs) -> Result<()> {
-    let target_arg = args.target.clone().ok_or(Error::MissingTarget)?;
-    let harness = args.harness.clone().ok_or(Error::MissingHarness)?;
-    if !target_arg.is_dir() {
-        return Err(Error::TargetNotDir(target_arg));
-    }
-    let target = std::fs::canonicalize(&target_arg)?;
+    let (harness, target) = if args.root {
+        reject_root_project_flags(&args)?;
+        if args.target.is_some() {
+            return Err(Error::Msg("pass either a target directory or --root, not both".into()));
+        }
+        let home = user_home()?;
+        if !home.is_dir() {
+            return Err(Error::TargetNotDir(home));
+        }
+        let target = std::fs::canonicalize(&home)?;
+        warn_relocated_config_homes(&target);
+        let harness = args.harness.clone().ok_or(Error::MissingHarness)?;
+        (harness, target)
+    } else {
+        let target_arg = args.target.clone().ok_or(Error::MissingTarget)?;
+        let harness = args.harness.clone().ok_or(Error::MissingHarness)?;
+        if !target_arg.is_dir() {
+            return Err(Error::TargetNotDir(target_arg));
+        }
+        let target = std::fs::canonicalize(&target_arg)?;
+        (harness, target)
+    };
     run_work(kit_root, catalog, args, harness, target, false)
 }
 
+fn cmd_uninstall(catalog: &Catalog, args: UninstallArgs) -> Result<()> {
+    if args.root && args.target.is_some() {
+        return Err(Error::Msg("pass either a target directory or --root, not both".into()));
+    }
+    let target = if args.root {
+        let home = user_home()?;
+        if !home.is_dir() {
+            return Err(Error::TargetNotDir(home));
+        }
+        std::fs::canonicalize(&home)?
+    } else {
+        let target_arg = args.target.clone().ok_or(Error::MissingTarget)?;
+        if !target_arg.is_dir() {
+            return Err(Error::TargetNotDir(target_arg));
+        }
+        std::fs::canonicalize(&target_arg)?
+    };
+    uninstall::run(&uninstall::UninstallRequest {
+        target,
+        catalog: catalog.clone(),
+        yes: args.yes,
+        dry_run: args.dry_run,
+        root: args.root,
+    })
+}
+
 fn cmd_init(kit_root: &Path, catalog: &Catalog, mut args: WorkArgs) -> Result<()> {
+    if args.root {
+        return Err(Error::Msg(
+            "init does not take --root; use symkit install --root".into(),
+        ));
+    }
     if args.target.is_none() {
         if !io::stdin().is_terminal() {
             return Err(Error::MissingTarget);
@@ -312,11 +385,23 @@ fn run_work(
     }
     let migration_docs = args.migration_docs && !args.no_migration_docs;
 
+    let adapter_default: Vec<String>;
+    let adapter_default_ref: &[String] =
+        if args.root && args.adapters.is_none() && args.adapter.is_empty() && !args.adapters_all {
+            adapter_default = if catalog.adapters.all.is_empty() {
+                vec!["grok".into(), "claude".into(), "codex".into()]
+            } else {
+                catalog.adapters.all.clone()
+            };
+            &adapter_default
+        } else {
+            &catalog.adapters.default
+        };
     let adapters = resolve_adapters(
         args.adapters.as_deref(),
         &args.adapter,
         args.adapters_all,
-        &catalog.adapters.default,
+        adapter_default_ref,
     )?;
 
     let mut resolved = catalog.resolve(&harness, args.role.as_deref(), &args.pack)?;
@@ -347,6 +432,110 @@ fn run_work(
         docs: args.docs,
         docs_root: args.docs_root,
         migration_docs,
+        root: args.root,
     };
     install::run(&req)
+}
+
+fn reject_root_project_flags(args: &WorkArgs) -> Result<()> {
+    if args.scaffold {
+        return Err(Error::Msg(
+            "--root does not take --scaffold; that flag is for a project tree".into(),
+        ));
+    }
+    if !args.docs.is_empty() || args.docs_root.is_some() {
+        return Err(Error::Msg(
+            "--root does not take --docs or --docs-root; those flags are for a project tree".into(),
+        ));
+    }
+    if args.migration_docs || args.no_migration_docs {
+        return Err(Error::Msg(
+            "--root does not take --migration-docs; that flag is for a project tree".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn user_home() -> Result<PathBuf> {
+    if cfg!(windows) {
+        if let Some(path) = env::var_os("USERPROFILE") {
+            if !path.is_empty() {
+                return Ok(PathBuf::from(path));
+            }
+        }
+    }
+    if let Some(path) = env::var_os("HOME") {
+        if !path.is_empty() {
+            return Ok(PathBuf::from(path));
+        }
+    }
+    Err(Error::Msg("--root needs HOME (or USERPROFILE on Windows)".into()))
+}
+
+fn warn_relocated_config_homes(home: &Path) {
+    warn_if_relocated("GROK_HOME", home.join(".grok"));
+    warn_if_relocated("CODEX_HOME", home.join(".codex"));
+}
+
+fn warn_if_relocated(var: &str, expected: PathBuf) {
+    let Some(raw) = env::var_os(var) else {
+        return;
+    };
+    if raw.is_empty() || paths_equivalent(Path::new(&raw), &expected) {
+        return;
+    }
+    eprintln!(
+        "warn: {var} is {}; --root still writes {}.",
+        Path::new(&raw).display(),
+        expected.display()
+    );
+}
+
+fn paths_equivalent(given: &Path, expected: &Path) -> bool {
+    fn norm(path: &Path) -> PathBuf {
+        std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
+    }
+    norm(given) == norm(expected)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn root_rejects_scaffold() {
+        let args = WorkArgs {
+            root: true,
+            scaffold: true,
+            ..WorkArgs::default()
+        };
+        let err = reject_root_project_flags(&args).unwrap_err().to_string();
+        assert!(err.contains("--scaffold"), "{err}");
+    }
+
+    #[test]
+    fn root_rejects_docs_and_migration() {
+        let docs = WorkArgs {
+            root: true,
+            docs: vec!["slos".into()],
+            ..WorkArgs::default()
+        };
+        let err = reject_root_project_flags(&docs).unwrap_err().to_string();
+        assert!(err.contains("--docs"), "{err}");
+
+        let migration = WorkArgs {
+            root: true,
+            migration_docs: true,
+            ..WorkArgs::default()
+        };
+        let err = reject_root_project_flags(&migration).unwrap_err().to_string();
+        assert!(err.contains("--migration-docs"), "{err}");
+    }
+
+    #[test]
+    fn user_home_follows_home_when_set() {
+        if env::var_os("HOME").is_some() {
+            assert!(user_home().is_ok());
+        }
+    }
 }
