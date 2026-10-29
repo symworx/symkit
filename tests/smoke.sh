@@ -280,6 +280,33 @@ grep -q 'do not take the place of a licensed attorney' "$TL/.agents/agents/law-c
 [[ -d "$TL/.agents/skills/matter-draft" ]] && fail "matter-draft should be pruned on legal materials"
 [[ -f "$TL/.agents/skills/check-citations/SKILL.md" ]] || fail "check-citations stays on legal materials"
 
+# comedy harness
+TJ="$WORKDIR/comedy"
+"$CLI" init "$TJ" --harness comedy --role comedian --scaffold --yes
+[[ -f "$TJ/docs/room/README.md" ]] || fail "comedy scaffold room"
+[[ -f "$TJ/bits/README.md" ]] || fail "comedy scaffold bits"
+[[ -f "$TJ/notes/README.md" ]] || fail "comedy scaffold notes"
+[[ -f "$TJ/.agents/agents/comedian.md" ]] || fail "comedian agent"
+[[ -f "$TJ/.agents/agents/dadbot.md" ]] || fail "dadbot agent"
+[[ -f "$TJ/.grok/agents/dadbot.md" ]] || fail "grok dadbot"
+[[ -f "$TJ/.agents/rules/bits-as-truth.md" ]] || fail "bits-as-truth rule"
+[[ -f "$TJ/.agents/skills/write-bit/SKILL.md" ]] || fail "write-bit on comedian"
+[[ -f "$TJ/.agents/skills/punch-up/SKILL.md" ]] || fail "punch-up on comedian"
+[[ -f "$TJ/.agents/skills/dad-joke/SKILL.md" ]] || fail "dad-joke on comedian"
+[[ -f "$TJ/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on comedian"
+grep -q 'non-vulgar dad jokes' "$TJ/.agents/agents/dadbot.md" || fail "dadbot stays non-vulgar"
+grep -q 'one-liners, stories, characters' "$TJ/.agents/agents/comedian.md" || fail "comedian covers broader forms"
+"$CLI" show comedy | grep -q $'comedian\t.*\tdadbot$' || fail "show comedian may_spawn dadbot"
+"$CLI" show comedy | grep -q $'^dadbot\t' && fail "dadbot must not be a role"
+"$CLI" install "$TJ" --harness comedy --role materials --yes
+[[ -f "$TJ/.agents/agents/comedian.md" ]] && fail "comedian should be pruned on materials"
+[[ -f "$TJ/.agents/agents/dadbot.md" ]] && fail "dadbot should be pruned on materials"
+[[ -f "$TJ/.grok/agents/dadbot.md" ]] && fail "grok dadbot should be pruned on materials"
+[[ -f "$TJ/.agents/rules/bits-as-truth.md" ]] || fail "bits-as-truth stays on comedy materials"
+[[ -d "$TJ/.agents/skills/dad-joke" ]] && fail "dad-joke should be pruned on comedy materials"
+[[ -d "$TJ/.agents/skills/write-bit" ]] && fail "write-bit should be pruned on comedy materials"
+[[ -f "$TJ/.agents/skills/check-citations/SKILL.md" ]] || fail "check-citations stays on comedy materials"
+
 # refuse kit root
 if "$CLI" install "$ROOT" --harness education --role materials --yes 2>"$WORKDIR/err2"; then
   fail "should refuse kit root"

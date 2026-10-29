@@ -6,7 +6,7 @@ version: 4
 
 kit:
   name: symkit
-  description: Installable agent harnesses for education, research, AI, product, creative, performance, engineering, finance, and legal work
+  description: Installable agent harnesses for education, research, AI, product, creative, performance, engineering, finance, legal, and comedy work
 
 adapters:
   default: [grok]
@@ -380,3 +380,29 @@ harnesses:
         agents: [lawyer]
       materials:
         agents: [lawyer, paralegal, law-clerk]
+
+  comedy:
+    status: active
+    description: Bits from a written premise
+    default_role: comedian
+    workspace: harnesses/comedy/workspace
+    packages:
+      shared:
+        description: Comedy AGENTS, bits-as-truth
+        path: harnesses/comedy/packages/shared
+        student_safe: true
+      comedian:
+        description: Comedian session plus dadbot leaf
+        path: harnesses/comedy/packages/comedian
+        student_safe: true
+    roles:
+      comedian:
+        packages: [shared, comedian]
+        may_spawn: [dadbot]
+        skills: [delegate, write-bit, punch-up, dad-joke]
+      materials:
+        packages: [shared]
+        skills: []
+    prune:
+      materials:
+        agents: [comedian, dadbot]
