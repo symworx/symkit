@@ -1163,6 +1163,25 @@ harnesses:
     }
 
     #[test]
+    fn resolve_comedy_spawns_dadbot() {
+        let cat = load_repo();
+        let comedian = cat.resolve("comedy", Some("comedian"), &[]).unwrap();
+        assert_eq!(comedian.packages, ["shared", "comedian"]);
+        assert_eq!(comedian.may_spawn, ["dadbot"]);
+        assert!(comedian.skills.contains(&"write-bit".into()));
+        assert!(comedian.skills.contains(&"punch-up".into()));
+        assert!(comedian.skills.contains(&"dad-joke".into()));
+        assert!(comedian.skills.contains(&"delegate".into()));
+        let materials = cat.resolve("comedy", Some("materials"), &[]).unwrap();
+        assert_eq!(materials.packages, ["shared"]);
+        assert!(materials.may_spawn.is_empty());
+        assert!(!materials.skills.contains(&"dad-joke".into()));
+        assert_eq!(materials.prune.agents, ["comedian", "dadbot"]);
+        assert!(cat.resolve("comedy", Some("dadbot"), &[]).is_err());
+        assert!(cat.format_list().contains("comedy"));
+    }
+
+    #[test]
     fn teaching_alias_resolves_to_education() {
         let cat = load_repo();
         cat.check_harness_aliases(Path::new(env!("CARGO_MANIFEST_DIR")))

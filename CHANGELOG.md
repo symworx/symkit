@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Comedy harness. `comedian` (default) writes across standup forms and
+  may spawn `dadbot` for non-vulgar dad jokes. There is no dadbot
+  role. `materials` prunes both agents.
 - Legal harness. `lawyer` (default) installs the lawyer session and
   may spawn `paralegal` and `law-clerk`. `paralegal` installs the
   paralegal session and `law-clerk`, and prunes `lawyer`. There is

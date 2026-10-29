@@ -45,6 +45,7 @@ core/library/skills/  skill bodies; catalog.yaml assigns them to roles
 harnesses/
   ai/                 model-run and evaluation scaffolding
   creative/           voice, naming, copy, asset briefs
+  comedy/             bits from a written premise; role: comedian, leaf: dadbot
   engineering/        software implementation and tests; role: engineer
   performance/        exercise physiology + biomechanics; role: coach
   finance/            planning and tax from a written record; roles: advisor, CPA

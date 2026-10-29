@@ -33,6 +33,7 @@ Add the harness under `harnesses:` in `catalog.yaml`:
   (`docs/prd/`, `docs/brand/`, `docs/program/`). Finance scaffolds
   `docs/engagement/`, `docs/plan/`, `books/`, and `returns/`. Legal
   scaffolds `docs/engagement/`, `docs/matter/`, `record/`, and `drafts/`.
+  Comedy scaffolds `docs/room/`, `bits/`, and `notes/`.
   AI uses `config.yaml`.
   Engineering follows existing code — do not add a parallel spec template.
 

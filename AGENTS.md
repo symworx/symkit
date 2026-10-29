@@ -122,6 +122,9 @@ Requires rustup with **stable** (build/clippy/test) and **nightly**
 - Legal: the engagement, `docs/matter/`, and the record are the source
   of truth. Do not invent facts, authorities, deadlines, or holdings.
   Drafts do not take the place of a licensed attorney.
+- Comedy: the premise, `docs/room/`, and the bits already in the repo
+  are the source of truth. Do not invent laughs or that a bit was
+  performed. Dadbot stays on non-vulgar dad jokes.
 - If a target repo documents SymWorx (or another shared kernel), **wrap
   it** — do not reimplement those algorithms inside a harness.
 
