@@ -119,6 +119,9 @@ Requires rustup with **stable** (build/clippy/test) and **nightly**
   Do not invent loads, kinematics, or clinical advice.
 - Engineering: existing code, tests, and lockfiles are the source of truth.
   Do not invent a second stack or claim tests passed if they did not run.
+- Legal: the engagement, `docs/matter/`, and the record are the source
+  of truth. Do not invent facts, authorities, deadlines, or holdings.
+  Drafts do not take the place of a licensed attorney.
 - If a target repo documents SymWorx (or another shared kernel), **wrap
   it** — do not reimplement those algorithms inside a harness.
 

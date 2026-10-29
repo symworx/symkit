@@ -238,6 +238,48 @@ grep -q 'do not take the place of a professional financial advisor' "$TF/.agents
 [[ -f "$TF/.agents/rules/not-licensed.md" ]] || fail "not-licensed stays on materials"
 [[ -d "$TF/.agents/skills/delegate" ]] && fail "delegate should be pruned on finance materials"
 
+# legal harness
+TL="$WORKDIR/legal"
+"$CLI" init "$TL" --harness legal --role lawyer --scaffold --yes
+[[ -f "$TL/docs/engagement/README.md" ]] || fail "legal scaffold engagement"
+[[ -f "$TL/docs/matter/README.md" ]] || fail "legal scaffold matter"
+[[ -f "$TL/record/README.md" ]] || fail "legal scaffold record"
+[[ -f "$TL/drafts/README.md" ]] || fail "legal scaffold drafts"
+[[ -f "$TL/.agents/agents/lawyer.md" ]] || fail "lawyer agent"
+[[ -f "$TL/.agents/agents/paralegal.md" ]] || fail "paralegal agent on lawyer role"
+[[ -f "$TL/.agents/agents/law-clerk.md" ]] || fail "law-clerk agent on lawyer role"
+[[ -f "$TL/.grok/agents/law-clerk.md" ]] || fail "grok law-clerk"
+[[ -f "$TL/.agents/rules/not-counsel.md" ]] || fail "not-counsel rule"
+[[ -f "$TL/.agents/rules/matter-as-truth.md" ]] || fail "matter-as-truth rule"
+[[ -f "$TL/.agents/skills/matter-brief/SKILL.md" ]] || fail "matter-brief on lawyer"
+[[ -f "$TL/.agents/skills/matter-draft/SKILL.md" ]] || fail "matter-draft on lawyer"
+[[ -f "$TL/.agents/skills/authority-check/SKILL.md" ]] || fail "authority-check on lawyer"
+[[ -f "$TL/.agents/skills/record-index/SKILL.md" ]] || fail "record-index on lawyer"
+[[ -f "$TL/.agents/skills/delegate/SKILL.md" ]] || fail "delegate on lawyer"
+grep -q 'do not take the place of a licensed attorney' "$TL/.agents/agents/lawyer.md" || fail "lawyer disclaimer"
+grep -q 'do not take the place of a licensed attorney' "$TL/.agents/agents/paralegal.md" || fail "paralegal disclaimer"
+grep -q 'do not take the place of a licensed attorney' "$TL/.agents/agents/law-clerk.md" || fail "clerk disclaimer"
+"$CLI" show legal | grep -q $'lawyer\t.*\tparalegal law-clerk$' || fail "show lawyer may_spawn"
+"$CLI" show legal | grep -q $'paralegal\t.*\tlaw-clerk$' || fail "show paralegal may_spawn"
+"$CLI" show legal | grep -q $'^law-clerk\t' && fail "law-clerk must not be a role"
+"$CLI" install "$TL" --harness legal --role paralegal --yes
+[[ -f "$TL/.agents/agents/lawyer.md" ]] && fail "lawyer should be pruned on paralegal role"
+[[ -f "$TL/.grok/agents/lawyer.md" ]] && fail "grok lawyer should be pruned on paralegal role"
+[[ -f "$TL/.agents/agents/paralegal.md" ]] || fail "paralegal agent stays on paralegal role"
+[[ -f "$TL/.agents/agents/law-clerk.md" ]] || fail "law-clerk stays on paralegal role"
+[[ -d "$TL/.agents/skills/matter-brief" ]] && fail "matter-brief should be pruned on paralegal role"
+[[ -f "$TL/.agents/skills/matter-draft/SKILL.md" ]] || fail "matter-draft stays on paralegal role"
+[[ -f "$TL/.agents/skills/record-index/SKILL.md" ]] || fail "record-index stays on paralegal role"
+"$CLI" install "$TL" --harness legal --role materials --yes
+[[ -f "$TL/.agents/agents/lawyer.md" ]] && fail "lawyer should be pruned on legal materials"
+[[ -f "$TL/.agents/agents/paralegal.md" ]] && fail "paralegal should be pruned on legal materials"
+[[ -f "$TL/.agents/agents/law-clerk.md" ]] && fail "law-clerk should be pruned on legal materials"
+[[ -f "$TL/.grok/agents/law-clerk.md" ]] && fail "grok law-clerk should be pruned on legal materials"
+[[ -f "$TL/.agents/rules/not-counsel.md" ]] || fail "not-counsel stays on legal materials"
+[[ -d "$TL/.agents/skills/delegate" ]] && fail "delegate should be pruned on legal materials"
+[[ -d "$TL/.agents/skills/matter-draft" ]] && fail "matter-draft should be pruned on legal materials"
+[[ -f "$TL/.agents/skills/check-citations/SKILL.md" ]] || fail "check-citations stays on legal materials"
+
 # refuse kit root
 if "$CLI" install "$ROOT" --harness education --role materials --yes 2>"$WORKDIR/err2"; then
   fail "should refuse kit root"

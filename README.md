@@ -48,6 +48,7 @@ harnesses/
   engineering/        software implementation and tests; role: engineer
   performance/        exercise physiology + biomechanics; role: coach
   finance/            planning and tax from a written record; roles: advisor, CPA
+  legal/              matter work from a written record; roles: lawyer, paralegal
   product/            PRDs, roadmap, shipping notes
   research/           experiment tracking, reproducibility, paper layout
   education/          course templates, staff/learner agents (`teaching` is a deprecated alias)
