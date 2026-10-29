@@ -85,6 +85,27 @@ enum Command {
     },
     /// Big-picture flow, GitHub Release vs cargo vs clone, what to commit
     Guide,
+    /// [DRAFT] Install harness into user-global locations (see docs/root-install.md)
+    Root(RootArgs),
+}
+
+#[derive(Args, Default)]
+struct RootArgs {
+    /// Harness id (`symkit list`)
+    #[arg(long)]
+    harness: Option<String>,
+    /// Role in that harness
+    #[arg(long)]
+    role: Option<String>,
+    /// Adapter set (default: all for root)
+    #[arg(long)]
+    adapters: Option<String>,
+    /// Write without prompting
+    #[arg(long = "yes", short = 'y')]
+    yes: bool,
+    /// Print the preview and exit
+    #[arg(long)]
+    dry_run: bool,
 }
 
 #[derive(Args, Default)]
@@ -191,6 +212,12 @@ fn run() -> Result<()> {
             let target = std::fs::canonicalize(&target).map_err(|_| Error::TargetNotDir(target.clone()))?;
             let adapters = resolve_adapters(adapters.as_deref(), &adapter, adapters_all, &catalog.adapters.default)?;
             install::adapt_only(&target, &adapters)
+        }
+        Some(Command::Root(_args)) => {
+            // DRAFT — see docs/root-install.md
+            eprintln!("error: root install is a draft; see docs/root-install.md");
+            eprintln!("       not implemented yet — no files written");
+            Err(Error::Msg("root install not implemented (draft)".into()))
         }
     }
 }
