@@ -307,5 +307,80 @@ if "$CLI" install "$T_SLO" --harness education --role materials --docs nope --ye
 fi
 grep -q 'unknown doc template' "$WORKDIR/err-tmpl" || fail "unknown template message"
 
+# root install: fake HOME, never the real one
+"$CLI" install --help | grep -q -- '--root' || fail "install --root flag"
+T_HOME="$WORKDIR/home"
+mkdir -p "$T_HOME/.grok/skills/qc-things"
+printf 'personal\n' > "$T_HOME/.grok/skills/qc-things/SKILL.md"
+env -u GROK_HOME -u CODEX_HOME HOME="$T_HOME" \
+  "$CLI" install --root --harness engineering --role engineer --yes
+[[ -f "$T_HOME/.grok/agents/engineer.md" ]] || fail "root grok agent"
+[[ -f "$T_HOME/.grok/skills/write-tests/SKILL.md" ]] || fail "root grok skill"
+[[ -f "$T_HOME/.grok/rules/AGENTS-SYMKIT.md" ]] || fail "root grok overlay"
+[[ -f "$T_HOME/.agents/skills/write-tests/SKILL.md" ]] || fail "root agents skill"
+[[ -f "$T_HOME/.claude/CLAUDE.md" ]] || fail "root claude pointer"
+grep -q '@AGENTS-SYMKIT.md' "$T_HOME/.claude/CLAUDE.md" || fail "root claude import"
+[[ -f "$T_HOME/.codex/AGENTS.md" ]] || fail "root codex agents"
+grep -q '@AGENTS-SYMKIT.md' "$T_HOME/.codex/AGENTS.md" || fail "root codex import"
+[[ -f "$T_HOME/.symkit/state.yaml" ]] || fail "root state"
+grep -q '^managed_skills: ' "$T_HOME/.symkit/state.yaml" || fail "root managed skills"
+[[ -f "$T_HOME/.gitignore" ]] && fail "root must not write gitignore"
+[[ -f "$T_HOME/AGENTS.md" ]] && fail "root must not write AGENTS.md"
+[[ -f "$T_HOME/AGENTS-SYMKIT.md" ]] && fail "root must not write overlay at home"
+[[ -f "$T_HOME/CLAUDE.md" ]] && fail "root must not write CLAUDE.md at home"
+grep -q '^personal$' "$T_HOME/.grok/skills/qc-things/SKILL.md" || fail "unmanaged skill stays"
+
+env -u GROK_HOME -u CODEX_HOME HOME="$T_HOME" \
+  "$CLI" install --root --harness engineering --role materials --yes
+[[ -f "$T_HOME/.grok/agents/engineer.md" ]] && fail "root should prune managed engineer"
+[[ -f "$T_HOME/.agents/agents/engineer.md" ]] && fail "root should prune canonical engineer"
+grep -q '^personal$' "$T_HOME/.grok/skills/qc-things/SKILL.md" || fail "unmanaged skill stays after switch"
+
+if env -u GROK_HOME -u CODEX_HOME HOME="$T_HOME" \
+  "$CLI" install --root --harness engineering --role engineer --scaffold --yes \
+  2>"$WORKDIR/err-root-scaffold"; then
+  fail "root --scaffold should fail"
+fi
+grep -q -- '--scaffold' "$WORKDIR/err-root-scaffold" || fail "root scaffold message"
+[[ -f "$T_HOME/.grok/skills/qc-things/SKILL.md" ]] || fail "failed scaffold must not remove skills"
+
+if "$CLI" install "$T1" --root --harness engineering --role engineer --yes 2>"$WORKDIR/err-root-both"; then
+  fail "target and --root should fail"
+fi
+grep -q 'not both' "$WORKDIR/err-root-both" || fail "target and --root message"
+
+if "$CLI" init --root --harness engineering --role engineer --yes 2>"$WORKDIR/err-init-root"; then
+  fail "init --root should fail"
+fi
+grep -q 'install --root' "$WORKDIR/err-init-root" || fail "init --root message"
+
+# uninstall home install: managed names go, personal skill stays
+env -u GROK_HOME -u CODEX_HOME HOME="$T_HOME" \
+  "$CLI" uninstall --root --yes
+[[ -d "$T_HOME/.grok/skills/write-gherkin" ]] && fail "uninstall should remove managed skill"
+[[ -f "$T_HOME/.symkit/state.yaml" ]] && fail "uninstall should remove root state"
+grep -q '^personal$' "$T_HOME/.grok/skills/qc-things/SKILL.md" || fail "uninstall must keep unmanaged skill"
+[[ -f "$T_HOME/.grok/rules/AGENTS-SYMKIT.md" ]] && fail "uninstall should remove grok overlay"
+
+# project uninstall keeps repo AGENTS.md text and drops the harness
+T_UN="$WORKDIR/uninstall-proj"
+mkdir -p "$T_UN"
+printf 'repo-specific keep\n' > "$T_UN/AGENTS.md"
+"$CLI" install "$T_UN" --harness engineering --role engineer --adapters all --yes
+[[ -f "$T_UN/.agents/skills/write-tests/SKILL.md" ]] || fail "project skill before uninstall"
+[[ -f "$T_UN/CLAUDE.md" ]] || fail "project CLAUDE.md before uninstall"
+"$CLI" uninstall "$T_UN" --yes
+grep -q 'repo-specific keep' "$T_UN/AGENTS.md" || fail "uninstall must keep repo AGENTS.md"
+grep -q 'BEGIN symkit harness' "$T_UN/AGENTS.md" && fail "uninstall must strip harness pointer"
+[[ -f "$T_UN/AGENTS-SYMKIT.md" ]] && fail "uninstall must remove overlay"
+[[ -d "$T_UN/.agents/skills/write-tests" ]] && fail "uninstall must remove managed skill"
+[[ -f "$T_UN/CLAUDE.md" ]] && fail "uninstall must remove CLAUDE.md"
+[[ -f "$T_UN/.symkit/state.yaml" ]] && fail "uninstall must remove project state"
+[[ -f "$T_UN/.gitignore" ]] && grep -q 'BEGIN symkit agent trees' "$T_UN/.gitignore" && fail "uninstall must drop gitignore block"
+
+# project install still writes gitignore and AGENTS.md
+grep -q '.agents/' "$T1/.gitignore" || fail "project gitignore agents"
+[[ -f "$T1/AGENTS.md" ]] || fail "project AGENTS.md"
+
 pass "all smoke checks"
 echo "WORKDIR was $WORKDIR (removed)"

@@ -1,49 +1,73 @@
-# Root (user-global) install — draft
+# Root (user-home) install
 
-**Status:** draft / not implemented. Do not rely on this path yet.
-
-SymKit currently installs into a project/repo directory. A **root** option would install the same harness packs into user-level locations so every Codex (and other) session sees the skills/agents without a per-repo install.
-
-## Goal
+`symkit install --root` runs a normal install with `$HOME` as the target
+(`%USERPROFILE%` on Windows). Grok, Claude, and Codex then see the harness
+in every session. Project `install`, `init`, and `adapt` are unchanged.
 
 ```bash
-symkit install --root --harness engineering --role engineer --adapters all
-# or
-symkit root install --harness engineering --role engineer
+symkit install --root --harness engineering --role engineer --yes
 ```
 
-Result: skills appear in every Codex session via `~/.agents/skills/` (and optionally `~/.codex/skills/`), with global instructions in `~/.codex/AGENTS.md`.
+`--harness`, `--role`, `--pack`, `--also`, `--adapters`, `--adapter`,
+`--adapters-all`, `--no-prune`, `--yes`, `--dry-run`, and `--force` work
+as they do on a project. Do not pass a directory together with `--root`.
 
-## Destination mapping (draft)
+When you omit the adapter flags, `--root` selects `grok`, `claude`, and
+`codex`. An explicit set wins, including `--adapters grok` or
+`--adapters none`. A project install still defaults to `grok`.
 
-| Project install writes          | Root install writes (proposed)                  |
-|---------------------------------|-------------------------------------------------|
-| `<dir>/.agents/skills/`         | `~/.agents/skills/` (primary)                   |
-| `<dir>/.agents/agents/`         | `~/.agents/agents/` (or mapped to `~/.codex/agents/`) |
-| `<dir>/.agents/rules/`          | `~/.agents/rules/`                              |
-| `<dir>/.codex/skills/` (adapter)| `~/.codex/skills/`                              |
-| `AGENTS-SYMKIT.md` + pointer    | Merge into `~/.codex/AGENTS.md`                 |
-| `<dir>/.symkit/state.yaml`      | `~/.local/share/symkit/state.yaml` (or `~/.symkit/`) |
-| target `.gitignore`             | skip                                            |
-| `--scaffold` / `--docs`         | disabled or warned (no project tree)            |
+## What is written
 
-Respect `CODEX_HOME`, `XDG_DATA_HOME`, and existing `SYMKIT_DATA`.
+| Path under `$HOME` | Who reads it |
+|---|---|
+| `.agents/skills/`, `.agents/agents/`, `.agents/rules/` | Codex user skills live in `~/.agents/skills`. |
+| `.grok/skills/`, `.grok/agents/`, `.grok/rules/` | Grok (`$GROK_HOME`, default `~/.grok`). Rules apply to every project. |
+| `.grok/rules/AGENTS-SYMKIT.md` | Harness overlay (last pack that ships `AGENTS.md`). |
+| `.claude/skills/`, `.claude/agents/`, `.claude/rules/` | Claude Code. Grok also scans `~/.claude/rules/` when Claude compatibility is on. |
+| `.claude/AGENTS-SYMKIT.md`, `.claude/CLAUDE.md` | Claude global instructions. The pointer is `@AGENTS-SYMKIT.md`. |
+| `.codex/skills/` | Same skills mirror a project install writes. |
+| `.codex/AGENTS-SYMKIT.md`, `.codex/AGENTS.md` | Codex global instructions (`$CODEX_HOME`, default `~/.codex`). |
+| `.symkit/state.yaml` | Harness, role, and the names this install manages. |
 
-## Implementation sketch
+`~/AGENTS.md`, `~/AGENTS-SYMKIT.md`, and `~/.gitignore` are not written.
+Package `docs/` are not copied into `~/docs`.
 
-1. **CLI** (`src/main.rs`): add `--root` flag on `install` (or a `Root` subcommand). When set, target is resolved to a user home path instead of a project dir. Refuse `--scaffold` / course `--docs` by default.
-2. **Install path logic** (`src/install.rs`): when root mode is active, rewrite canonical + adapter destinations from relative-to-target to absolute user paths. Reuse existing merge/prune/state code.
-3. **Adapters**: same catalog entries; only the output roots change. Optionally a "root" adapter variant that emits only global pieces.
-4. **State**: write outside any project so re-install can detect prior root installs and prune/switch roles.
-5. **Safety**: preview always, require `--yes` for non-TTY, never touch a project `.gitignore`, refuse self-install of the kit repo.
+If `~/.codex/AGENTS.override.md` already exists, it is left alone. Codex
+reads that file instead of `AGENTS.md`. The preview says so.
 
-## Open questions
+If `GROK_HOME` or `CODEX_HOME` points somewhere other than `~/.grok` or
+`~/.codex` under this home, symkit warns and still writes the default
+dot-directories. It does not follow those variables to a second root.
 
-- One root tree vs multiple harnesses (warn on mix, same as project)?
-- Agent format: keep Markdown under `~/.agents/agents/` or convert for Codex subagents under `~/.codex/agents/`?
-- Should root mode also write a Claude/Grok global equivalent, or Codex-only for v1?
-- How to uninstall / reset a root install?
+## What is refused
 
-## Not in this draft
+- `symkit init --root`
+- `--root` together with a target directory
+- `--scaffold`, `--docs`, `--docs-root`, `--migration-docs` (project trees)
+- `--root` when `HOME` is unset (`USERPROFILE` on Windows)
+- Installing when the home directory is the symkit repo
 
-No functional code yet. This file is the design note only.
+## Prune
+
+A project install removes role leftovers and library skills the role did
+not select. `--root` only removes names recorded in `.symkit/state.yaml`
+by an earlier root install that this run no longer includes. A personal
+skill in `~/.grok/skills/` stays, even when its folder name matches a
+library skill. `--no-prune` skips that step.
+
+Re-install merges. The same skill or agent name is overwritten. The
+preview names paths that already exist and were not in the previous
+managed set.
+
+Open a new Grok, Claude, or Codex session after install.
+
+## Uninstall
+
+```bash
+symkit uninstall --root --yes
+```
+
+This removes names recorded in `~/.symkit/state.yaml` from `~/.agents`,
+`~/.grok`, `~/.claude`, and `~/.codex`, and strips the harness pointer from
+`~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`. A skill symkit did not
+record is left in place. `AGENTS.override.md` is left alone.
