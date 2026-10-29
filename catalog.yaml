@@ -6,7 +6,7 @@ version: 4
 
 kit:
   name: symkit
-  description: Installable agent harnesses for education, research, AI, product, creative, performance, engineering, and finance work
+  description: Installable agent harnesses for education, research, AI, product, creative, performance, engineering, finance, and legal work
 
 adapters:
   default: [grok]
@@ -340,3 +340,43 @@ harnesses:
     prune:
       materials:
         agents: [financial-advisor, cpa, bookkeeper, file-reviewer]
+
+  legal:
+    status: active
+    description: Matter work from a written record
+    default_role: lawyer
+    workspace: harnesses/legal/workspace
+    packages:
+      shared:
+        description: Legal AGENTS, matter-as-truth, not-counsel
+        path: harnesses/legal/packages/shared
+        student_safe: true
+      lawyer:
+        description: Lawyer session
+        path: harnesses/legal/packages/lawyer
+        student_safe: true
+      paralegal:
+        description: Paralegal session
+        path: harnesses/legal/packages/paralegal
+        student_safe: true
+      clerk:
+        description: Law-clerk leaf (not a role)
+        path: harnesses/legal/packages/clerk
+        student_safe: true
+    roles:
+      lawyer:
+        packages: [shared, lawyer, paralegal, clerk]
+        may_spawn: [paralegal, law-clerk]
+        skills: [delegate, matter-brief, matter-draft, authority-check, record-index]
+      paralegal:
+        packages: [shared, paralegal, clerk]
+        may_spawn: [law-clerk]
+        skills: [delegate, matter-draft, authority-check, record-index]
+      materials:
+        packages: [shared]
+        skills: []
+    prune:
+      paralegal:
+        agents: [lawyer]
+      materials:
+        agents: [lawyer, paralegal, law-clerk]

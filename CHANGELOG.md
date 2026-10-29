@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Legal harness. `lawyer` (default) installs the lawyer session and
+  may spawn `paralegal` and `law-clerk`. `paralegal` installs the
+  paralegal session and `law-clerk`, and prunes `lawyer`. There is
+  no law-clerk role. Drafts do not take the place of a licensed
+  attorney. `materials` prunes all three agents.
 - `symkit install --root` installs a harness into `$HOME`
   (`%USERPROFILE%` on Windows) so Grok, Claude, and Codex load it in
   every session. Adapters default to `grok claude codex`. The harness

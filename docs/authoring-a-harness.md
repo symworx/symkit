@@ -31,7 +31,9 @@ Add the harness under `harnesses:` in `catalog.yaml`:
   Education ships `slos`; research ships `aims` and `protocol`. Product,
   creative, and performance already scaffold their truth dirs
   (`docs/prd/`, `docs/brand/`, `docs/program/`). Finance scaffolds
-  `docs/engagement/`, `docs/plan/`, `books/`, and `returns/`. AI uses `config.yaml`.
+  `docs/engagement/`, `docs/plan/`, `books/`, and `returns/`. Legal
+  scaffolds `docs/engagement/`, `docs/matter/`, `record/`, and `drafts/`.
+  AI uses `config.yaml`.
   Engineering follows existing code — do not add a parallel spec template.
 
 ## Check

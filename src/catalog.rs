@@ -1136,6 +1136,33 @@ harnesses:
     }
 
     #[test]
+    fn resolve_legal_lawyer_and_paralegal() {
+        let cat = load_repo();
+        let lawyer = cat.resolve("legal", Some("lawyer"), &[]).unwrap();
+        assert_eq!(lawyer.packages, ["shared", "lawyer", "paralegal", "clerk"]);
+        assert_eq!(lawyer.may_spawn, ["paralegal", "law-clerk"]);
+        assert!(lawyer.skills.contains(&"matter-brief".into()));
+        assert!(lawyer.skills.contains(&"matter-draft".into()));
+        assert!(lawyer.skills.contains(&"authority-check".into()));
+        assert!(lawyer.skills.contains(&"record-index".into()));
+        assert!(lawyer.skills.contains(&"delegate".into()));
+        let paralegal = cat.resolve("legal", Some("paralegal"), &[]).unwrap();
+        assert_eq!(paralegal.packages, ["shared", "paralegal", "clerk"]);
+        assert_eq!(paralegal.may_spawn, ["law-clerk"]);
+        assert!(!paralegal.skills.contains(&"matter-brief".into()));
+        assert!(paralegal.skills.contains(&"matter-draft".into()));
+        assert_eq!(paralegal.prune.agents, ["lawyer"]);
+        let materials = cat.resolve("legal", Some("materials"), &[]).unwrap();
+        assert_eq!(materials.packages, ["shared"]);
+        assert!(materials.may_spawn.is_empty());
+        assert!(!materials.skills.contains(&"delegate".into()));
+        assert_eq!(materials.prune.agents, ["lawyer", "paralegal", "law-clerk"]);
+        assert!(cat.resolve("legal", Some("law-clerk"), &[]).is_err());
+        assert!(cat.format_list().contains("legal"));
+        cat.check_spawn_agents(Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+    }
+
+    #[test]
     fn teaching_alias_resolves_to_education() {
         let cat = load_repo();
         cat.check_harness_aliases(Path::new(env!("CARGO_MANIFEST_DIR")))
