@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.4.0] - 2026-10-29
+
+### Added
+
 - Comedy harness. `comedian` (default) writes across standup forms and
   may spawn `dadbot` for non-vulgar dad jokes. There is no dadbot
   role. `materials` prunes both agents.
