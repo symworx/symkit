@@ -69,6 +69,7 @@ examples/             how to add a custom overlay
 | `symkit install <dir>` | Install packs into an existing repo |
 | `symkit adapt <dir>` | Rewrite vendor adapters only |
 | `symkit guide` | Big-picture flow, cargo vs clone, what to commit |
+| `symkit help` | Same usage text as `symkit --help` |
 
 Adapters default to **grok**. Harness `AGENTS.md` lands in `AGENTS-SYMKIT.md`
 (last pack wins). A pointer is appended to `AGENTS.md`; an existing file is

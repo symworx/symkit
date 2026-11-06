@@ -3,7 +3,7 @@
 
 //! Top-level help copy. Keep this aligned with README.md and docs/install.md.
 
-/// Shown after the command list on `symkit`, `-h`, and `--help`.
+/// Shown after the command list on `symkit`, `symkit help`, `-h`, and `--help`.
 pub const AFTER_HELP: &str = "\
 FLOW
   1. list / show     pick a harness and role

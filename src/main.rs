@@ -92,6 +92,8 @@ enum Command {
     },
     /// Big-picture flow, GitHub Release vs cargo vs clone, what to commit
     Guide,
+    /// Show usage
+    Help,
 }
 
 #[derive(Args, Default)]
@@ -166,6 +168,13 @@ struct WorkArgs {
     dry_run: bool,
 }
 
+/// Same text as `symkit --help` (long help, no extra trailing blank line).
+fn print_usage() -> Result<()> {
+    use clap::CommandFactory;
+    Cli::command().print_long_help()?;
+    Ok(())
+}
+
 fn main() -> ExitCode {
     match run() {
         Ok(()) => ExitCode::SUCCESS,
@@ -178,6 +187,11 @@ fn main() -> ExitCode {
 
 fn run() -> Result<()> {
     let cli = Cli::parse();
+    // `--help` exits in clap, before find_kit_root. `help` matches that text
+    // and does not extract the embedded kit.
+    if matches!(cli.command, Some(Command::Help)) {
+        return print_usage();
+    }
     let kit_root = find_kit_root()?;
     let catalog = Catalog::load(kit_root.join("catalog.yaml"))?;
 
@@ -194,6 +208,7 @@ fn run() -> Result<()> {
             print!("{}", help::guide());
             Ok(())
         }
+        Some(Command::Help) => print_usage(),
         Some(Command::List) => {
             print!("{}", catalog.format_list());
             Ok(())
