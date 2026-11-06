@@ -27,6 +27,7 @@ pass() { echo "ok  $*"; }
 "$CLI" show performance | grep -q '^STATUS=active' || fail "performance active"
 "$CLI" --help | grep -q '^FLOW' || fail "help FLOW"
 "$CLI" --help | grep -q 'symkit guide' || fail "help points at guide"
+diff -q <("$CLI" help) <("$CLI" --help) >/dev/null || fail "help matches --help"
 "$CLI" guide | grep -q 'cargo install' || fail "guide cargo install"
 "$CLI" guide | grep -q 'GitHub Release' || fail "guide GitHub Release"
 "$CLI" guide | grep -q 'symworx/symkit/releases' || fail "guide releases URL"

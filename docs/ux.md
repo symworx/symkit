@@ -4,7 +4,7 @@ CLI-first. No web app.
 
 ## Flow: create a workspace
 
-`symkit --help` and `symkit guide` print this for end users.
+`symkit help`, `symkit --help`, and `symkit guide` print this for end users.
 
 1. Where — target directory
 2. Which harness — `symkit list` (education, research, engineering, …)

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `symkit help` prints the same usage text as `symkit --help`.
+
 ## [0.4.0] - 2026-10-29
 
 ### Added
